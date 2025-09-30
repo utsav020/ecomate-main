@@ -43,3 +43,22 @@ a {
     color-scheme: dark;
   }
 } */
+
+
+/* Remove default arrow in IE */
+select::-ms-expand {
+  display: none;
+}
+
+/* Focus styles */
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Disabled state */
+select:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}

@@ -17,9 +17,7 @@ export default function Home() {
             <SideLeft collapsed={sidebarCollapsed} />
             <div className={`right-area-body-content ${sidebarCollapsed ? 'collapsed' : ''}`}>
                 <Header onToggleSidebar={toggleSidebar} />
-                <DemoContent onClose={function (): void {
-                    throw new Error('Function not implemented.');
-                } } />
+                <DemoContent onClose={function (): void {} } />
             </div>
         </div>
     );

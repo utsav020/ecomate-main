@@ -58,12 +58,12 @@ const ProductDetails: React.FC<ModalProps> = ({
         dialogClassName="modal-compare"
       >
         <div className="product-details-popup-wrapper popup">
-          <div className="rts-product-details-section rts-product-details-section2 product-details-popup-section">
+          <div className="rts-product-details-section2 product-details-popup-section">
             <div className="product-details-popup">
               <button className="product-details-close-btn" onClick={handleClose}>
                 <i className="fal fa-times" />
               </button>
-              <div className="details-product-area">
+              <div className="">
                 <div className="product-thumb-area">
                   <div className="cursor" />
                   <div className="thumb-wrapper one filterd-items figure">
@@ -112,7 +112,7 @@ const ProductDetails: React.FC<ModalProps> = ({
                   </h2>
 
                   <span className="product-price">
-                    <span className="old-price">$9.35</span> ${totalPrice}
+                    <span className="old-price">$69.35</span> ${totalPrice}
                   </span>
 
                   <p>

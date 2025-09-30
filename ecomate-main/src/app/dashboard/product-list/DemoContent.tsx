@@ -1,302 +1,200 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import DataTable, { TableColumn } from 'react-data-table-component';
+import { API_BASE_URL } from "@/lib/api";
+import axios from "axios";
+import { Eye, SquarePen, Trash2 } from "lucide-react";
+import router from "next/router";
+import React, { useState, useEffect } from "react";
+import DataTable, { TableColumn } from "react-data-table-component";
 
-interface Product {
-  id: number;
-  name: string;
-  productNo: string;
-  category: string;
-  price: string;
-  date: string;
-  stock: number;
-  image: string;
+interface Variant {
+  product_category_id: number;
+  productCategoryName: string;
+  regularPrice: string;
+  salePrice: string;
+  weights: string;
+  quantity: number;
+  is_default: number;
 }
 
-const LOCAL_STORAGE_KEY = 'productTableData';
+interface Product {
+  product_id: number;
+  category_id: number;
+  productName: string;
+  regularPrice: string | null;
+  salePrice: string | null;
+  weights: string | null;
+  quantity: string | number | null;
+  description: string;
+  has_variants: number;
+  variants?: Variant[];
+}
+
+interface TableRow {
+  id: string; // unique id for DataTable
+  name: string;
+  regularPrice: string | number | null;
+  salePrice: string | number | null;
+  quantity: string | number | null;
+  categoryId: number;
+  isVariant: boolean;
+}
 
 const ProductTable = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [editProductId, setEditProductId] = useState<number | null>(null);
-  const [editFormData, setEditFormData] = useState<Partial<Product>>({});
-  const [filterText, setFilterText] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedRows, setSelectedRows] = useState<Product[]>([]);
-  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+  const [filterText, setFilterText] = useState("");
 
-  const dropdownRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-
-  // Initialize products from localStorage or default data
-  useEffect(() => {
-    const savedProducts = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    } else {
-      const defaultProducts: Product[] = [
-        { id: 1, name: 'Rede Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$200', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/15.png' },
-        { id: 2, name: 'Green Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$120', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/15.png' },
-        { id: 3, name: 'Hree Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$125', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/17.png' },
-        { id: 4, name: 'Kabir Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$133', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/18.png' },
-        { id: 5, name: 'leer Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$132', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/19.png' },
-        { id: 6, name: 'Purple Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$200', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/14.png' },
-        { id: 7, name: 'Purple Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$200', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/17.png' },
-        { id: 8, name: 'Purple Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$200', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/18.png' },
-        { id: 9, name: 'Purple Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$200', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/17.png' },
-        { id: 10, name: 'Purple Blue Gradient iPhone Case', productNo: '#87845', category: 'Electronics', price: '$200', date: '03/02/2022', stock: 250, image: '/assets/images-dashboard/grocery/19.png' },
-      ];
-      setProducts(defaultProducts);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultProducts));
+  const fetchAllProducts = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/product/getallproducts`);
+      setProducts(res.data || []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setProducts([]);
     }
+  };
+
+  useEffect(() => {
+    fetchAllProducts();
   }, []);
 
-  // Save products to localStorage on change
-  useEffect(() => {
-    if (products.length > 0) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(products));
-    }
-  }, [products]);
+  // Transform products + variants into a flat array for DataTable
+  const getTableData = (): TableRow[] => {
+    const rows: TableRow[] = [];
 
-  // Close dropdown if clicked outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const isInside = Array.from(dropdownRefs.current.values()).some(
-        (ref) => ref && ref.contains(event.target as Node)
-      );
-      if (!isInside) setActiveDropdown(null);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    products.forEach((p) => {
+      // Main product row
+      rows.push({
+        id: `p-${p.product_id}`,
+        name: p.productName,
+        regularPrice: p.regularPrice,
+        salePrice: p.salePrice,
+        quantity: p.quantity,
+        categoryId: p.category_id,
+        isVariant: false,
+      });
 
-  // Handlers
-  const handleEdit = (id: number) => {
-    const productToEdit = products.find((p) => p.id === id);
-    if (productToEdit) {
-      setEditFormData(productToEdit);
-      setEditProductId(id);
-      setActiveDropdown(null);
-    }
+      // Add variants as rows if any
+      if (p.has_variants && p.variants && p.variants.length > 0) {
+        p.variants.forEach((v) => {
+          rows.push({
+            id: `v-${v.product_category_id}`,
+            name: `↳ ${v.productCategoryName}`, // indent with arrow
+            regularPrice: v.regularPrice,
+            salePrice: v.salePrice,
+            quantity: v.quantity,
+            categoryId: p.category_id,
+            isVariant: true,
+          });
+        });
+      }
+    });
+
+    return rows;
   };
 
-  const handleSave = () => {
-    if (!editProductId) return;
-    const updatedProducts = products.map((product) =>
-      product.id === editProductId ? { ...product, ...editFormData } as Product : product
-    );
-    setProducts(updatedProducts);
-    setEditProductId(null);
-    setEditFormData({});
-  };
+  const tableData = getTableData();
 
-  const handleCancel = () => {
-    setEditProductId(null);
-    setEditFormData({});
-  };
-
-  const handleDelete = (id: number) => {
-    const updatedProducts = products.filter((product) => product.id !== id);
-    setProducts(updatedProducts);
-    setActiveDropdown(null);
-  };
-
-  const handleAddProduct = () => {
-    const newId = products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
-    const newProduct: Product = {
-      id: newId,
-      name: 'New Product',
-      productNo: `#${Math.floor(100000 + Math.random() * 900000)}`,
-      category: 'Electronics',
-      price: '$100',
-      date: new Date().toLocaleDateString(),
-      stock: 100,
-      image: '/assets/images-dashboard/grocery/19.png',
-    };
-    setProducts([...products, newProduct]);
-  };
-
-  // Table columns
-  const columns: TableColumn<Product>[] = [
+  const columns: TableColumn<TableRow>[] = [
     {
-      name: 'Product Name',
+      name: "Product / Variant",
       selector: (row) => row.name,
+      sortable: true,
       cell: (row) => (
-        <div className="item-image-and-name editable">
-          <a href="#" className="thumbnail">
-            <img src={row.image} alt="grocery" />
-          </a>
-          {editProductId === row.id ? (
-            <input
-              type="text"
-              value={editFormData.name || ''}
-              onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-            />
-          ) : (
-            <p>{row.name}</p>
-          )}
-        </div>
+        <span className={row.isVariant ? "text-gray-600 ml-4" : ""}>
+          {row.name}
+        </span>
       ),
     },
     {
-      name: 'Product No',
-      selector: (row) => row.productNo,
-      cell: (row) =>
-        editProductId === row.id ? (
-          <input
-            type="text"
-            value={editFormData.productNo || ''}
-            onChange={(e) => setEditFormData({ ...editFormData, productNo: e.target.value })}
-          />
-        ) : (
-          <p>{row.productNo}</p>
-        ),
+      name: "Regular Price",
+      selector: (row) => row.regularPrice ?? "-",
+      sortable: true,
+      cell: (row) => row.regularPrice ?? "-",
     },
     {
-      name: 'Category',
-      selector: (row) => row.category,
-      cell: (row) =>
-        editProductId === row.id ? (
-          <input
-            type="text"
-            value={editFormData.category || ''}
-            onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
-          />
-        ) : (
-          <p>{row.category}</p>
-        ),
+      name: "Sale Price",
+      selector: (row) => row.salePrice ?? "-",
+      sortable: true,
+      cell: (row) => row.salePrice ?? "-",
     },
     {
-      name: 'Price',
-      selector: (row) => row.price,
-      cell: (row) =>
-        editProductId === row.id ? (
-          <input
-            type="text"
-            value={editFormData.price || ''}
-            onChange={(e) => setEditFormData({ ...editFormData, price: e.target.value })}
-          />
-        ) : (
-          <p>{row.price}</p>
-        ),
+      name: "Quantity",
+      selector: (row) => row.quantity ?? "-",
+      sortable: true,
+      cell: (row) => row.quantity ?? "-",
     },
     {
-      name: 'Stock',
-      selector: (row) => row.stock,
-      cell: (row) =>
-        editProductId === row.id ? (
-          <input
-            type="number"
-            value={editFormData.stock || 0}
-            onChange={(e) =>
-              setEditFormData({ ...editFormData, stock: parseInt(e.target.value) || 0 })
-            }
-          />
-        ) : (
-          <p>{row.stock}</p>
-        ),
+      name: "Category ID",
+      selector: (row) => row.categoryId,
+      sortable: true,
     },
     {
-      name: 'Action',
+      name: "Actions",
       cell: (row) => (
-        <div style={{ position: 'relative' }}>
-          <img
-            src="/assets/images-dashboard/grocery/20.png"
-            alt="menu"
-            width={20}
-            height={20}
-            onClick={() => setActiveDropdown((prev) => (prev === row.id ? null : row.id))}
-            style={{ cursor: 'pointer' }}
-          />
-          {activeDropdown === row.id && (
-            <div
-              className="action-edit-deleate"
-              ref={(el) => {
-                if (el) dropdownRefs.current.set(row.id, el);
-                else dropdownRefs.current.delete(row.id);
-              }}
-              style={{ position: 'absolute', right: 0, background: '#fff', border: '1px solid #ddd', zIndex: 10 }}
-            >
-              {editProductId === row.id ? (
-                <>
-                  <span onClick={handleSave} style={{ display: 'block', padding: '5px 10px', cursor: 'pointer' }}>
-                    Save
-                  </span>
-                  <span onClick={handleCancel} style={{ display: 'block', padding: '5px 10px', cursor: 'pointer' }}>
-                    Cancel
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span onClick={() => handleEdit(row.id)} style={{ display: 'block', padding: '5px 10px', cursor: 'pointer' }}>
-                    Edit
-                  </span>
-                  <span onClick={() => handleDelete(row.id)} style={{ display: 'block', padding: '5px 10px', cursor: 'pointer' }}>
-                    Delete
-                  </span>
-                </>
-              )}
-            </div>
-          )}
+        <div className="flex gap-2">
+          <button className="bg-blue-500 p-2 rounded"><Eye /></button>
+          <button className="bg-yellow-500 p-2 rounded"><SquarePen /></button>
+          <button className="bg-red-500 p-2 rounded"><Trash2 /></button>
         </div>
       ),
     },
   ];
 
-  // Filtered items
-  const filteredItems = products.filter(
+  const filteredItems = tableData.filter(
     (item) =>
       item.name.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.productNo.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.category.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.price.toLowerCase().includes(filterText.toLowerCase())
+      (item.regularPrice ?? "").toString().toLowerCase().includes(filterText.toLowerCase()) ||
+      (item.salePrice ?? "").toString().toLowerCase().includes(filterText.toLowerCase()) ||
+      (item.quantity ?? "").toString().toLowerCase().includes(filterText.toLowerCase())
   );
 
-  return (
-    <div className="body-root-inner">
-      <div className="transection">
-        <div className="title-right-actioin-btn-wrapper-product-list">
-          <h3 className="title">Product</h3>
-          <div className="button-wrapper">
-            <button className="rts-btn btn-primary" onClick={handleAddProduct}>
-              + Add Product
-            </button>
-          </div>
-        </div>
-
-        <div className="product-top-filter-area-l">
-          <div className="left-area-button-fiulter">
-            <div className="signle-product-single-button">
-              <span>All {products.length}</span>
-            </div>
-            <div className="signle-product-single-button">
-              <span>New Item {products.filter((p) => p.name.includes('New')).length}</span>
-            </div>
-          </div>
-          <div className="right-area-search">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="vendor-list-main-wrapper product-wrapper">
-          <div className="table-responsive">
-            <DataTable
-              columns={columns}
-              data={filteredItems}
-              selectableRows
-              onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
-              pagination
-              paginationPerPage={rowsPerPage}
-              paginationRowsPerPageOptions={[5, 10, 15, 20]}
-              noDataComponent="No products found"
-            />
-          </div>
+  return (  
+    <div className="p-4">
+      {/* Header */}
+      <div className="title-right-actioin-btn-wrapper-product-list">
+        <h3 className="title">Categories</h3>
+        <div className="button-wrapper">
+          <button
+            className="rts-btn btn-primary"
+            onClick={() => router.push("/dashboard/category-add")}
+          >
+            + Add Product
+          </button>
         </div>
       </div>
+
+      {/* Search & Count */}
+      <div className="product-top-filter-area-l">
+        <div className="left-area-button-fiulter">
+          <div className="signle-product-single-button">
+            <span>All {products.length}</span>
+          </div>
+          <div className="signle-product-single-button">
+            <span>
+              New Item{" "}
+              {products.filter((c) => c.productName.includes("New")).length}
+            </span>
+          </div>
+        </div>
+        <div className="right-area-search">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={filteredItems}
+        pagination
+        highlightOnHover
+        pointerOnHover
+        noDataComponent="No products found"
+      />
     </div>
   );
 };

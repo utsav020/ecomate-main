@@ -1,13 +1,8 @@
-import React from 'react';
-
-
+import React from "react";
 
 function MyComponent() {
   return (
     <div>
-
-
-
       <div className="row mt--10 g-5">
         <div className="col-xl-8 col-lg-12">
           <div className="top-product-wrapper-scroll">
@@ -21,7 +16,10 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/grocery/08.jpg" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/grocery/08.jpg"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p>Quaker Oats Healthy Meal...</p>
@@ -33,20 +31,29 @@ function MyComponent() {
                   <span className="d-block">2415</span>
                 </div>
                 <div className="logo">
-                  <img src="/assets/images-dashboard/brand/01.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/01.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="indec">
                   <div className="left">
                     <p>5.29%</p>
                     <span>$79.00</span>
                   </div>
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
               </div>
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/grocery/09.jpg" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/grocery/09.jpg"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p>Quaker Oats Healthy Meal...</p>
@@ -58,20 +65,29 @@ function MyComponent() {
                   <span className="d-block">2415</span>
                 </div>
                 <div className="logo">
-                  <img src="/assets/images-dashboard/brand/08.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/08.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="indec">
                   <div className="left">
                     <p>5.29%</p>
                     <span>$79.00</span>
                   </div>
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
               </div>
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/grocery/10.jpg" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/grocery/10.jpg"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p>Quaker Oats Healthy Meal...</p>
@@ -83,20 +99,29 @@ function MyComponent() {
                   <span className="d-block">2415</span>
                 </div>
                 <div className="logo">
-                  <img src="/assets/images-dashboard/brand/01.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/01.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="indec">
                   <div className="left">
                     <p>5.29%</p>
                     <span>$79.00</span>
                   </div>
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
               </div>
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/grocery/11.jpg" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/grocery/11.jpg"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p>Quaker Oats Healthy Meal...</p>
@@ -108,20 +133,29 @@ function MyComponent() {
                   <span className="d-block">2415</span>
                 </div>
                 <div className="logo">
-                  <img src="/assets/images-dashboard/brand/09.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/09.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="indec">
                   <div className="left">
                     <p>5.29%</p>
                     <span>$79.00</span>
                   </div>
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
               </div>
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/grocery/11.jpg" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/grocery/11.jpg"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p>Quaker Oats Healthy Meal...</p>
@@ -133,14 +167,20 @@ function MyComponent() {
                   <span className="d-block">2415</span>
                 </div>
                 <div className="logo">
-                  <img src="/assets/images-dashboard/brand/10.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/10.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="indec">
                   <div className="left">
                     <p>5.29%</p>
                     <span>$79.00</span>
                   </div>
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
               </div>
             </div>
@@ -166,14 +206,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/02.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/02.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">USA</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -185,14 +231,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/02.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/02.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">Fracnh</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -204,14 +256,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/03.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/03.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">India</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -223,14 +281,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/04.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/04.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">italy</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -242,14 +306,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/05.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/05.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">japan</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -261,14 +331,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/06.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/06.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">Koria</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -280,14 +356,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/07.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/07.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">Indor</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -299,14 +381,20 @@ function MyComponent() {
               <div className="product-top-area-single">
                 <div className="image-area">
                   <a href="#" className="thumbnail">
-                    <img src="/assets/images-dashboard/brand/05.png" alt="grocery" />
+                    <img
+                      src="/assets/images-dashboard/brand/05.png"
+                      alt="grocery"
+                    />
                   </a>
                   <div className="information">
                     <p className="mb--0">Vutan</p>
                   </div>
                 </div>
                 <div className="coupon-code">
-                  <img src="/assets/images-dashboard/brand/arrow-m.png" alt="ekomart" />
+                  <img
+                    src="/assets/images-dashboard/brand/arrow-m.png"
+                    alt="ekomart"
+                  />
                 </div>
                 <div className="coupon-code">
                   <p>6,546</p>
@@ -319,9 +407,8 @@ function MyComponent() {
           </div>
         </div>
       </div>
-
     </div>
   );
-};
+}
 
 export default MyComponent;

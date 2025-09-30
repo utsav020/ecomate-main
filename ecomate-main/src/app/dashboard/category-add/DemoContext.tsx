@@ -104,6 +104,7 @@ const AddEditCategoryPage: React.FC<Props> = ({
   };
 
   return (
+    // Add-category Page
     <div className="body-root-inner">
       <div className="transection">
         <div className="vendor-list-main-wrapper product-wrapper add-product-page">
@@ -151,6 +152,7 @@ const AddEditCategoryPage: React.FC<Props> = ({
                   />
                 </div>
 
+                {/* Buttons */}
                 <div className="flex gap-10">
                   <div className="button-area-botton-wrapper-p-list">
                     <button
@@ -164,7 +166,8 @@ const AddEditCategoryPage: React.FC<Props> = ({
                           : "Adding..."
                         : isEditMode
                         ? "Update"
-                        : "Add Category"}
+                        : "Add Category"
+                      }
                     </button>
                   </div>
                   <div className="button-area-botton-wrapper-p-list">

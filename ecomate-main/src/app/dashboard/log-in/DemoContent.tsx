@@ -1,13 +1,16 @@
-"use client"
-import Image from 'next/image';
+"use client";
+import Image from "next/image";
 
 function DemoContent() {
-
   return (
     <div className="body-root-inner">
       <div className="registration-wrapper-1">
         <div className="logo-area mb--0">
-          <img className="mb--10" src="/assets/images/logo/fav.png" alt="logo" />
+          <img
+            className="mb--10"
+            src="/assets/images/logo/fav.png"
+            alt="logo"
+          />
         </div>
         <h3 className="title animated fadeIn">Login Into Your Account</h3>
         <form action="#" className="registration-form">
@@ -33,13 +36,12 @@ function DemoContent() {
               </a>
             </div>
             <p>
-              Already Have Account? <a href="#">Login</a>
+              Don't have an account? <a href="/dashboard/registration">Sign up.</a>
             </p>
           </div>
         </form>
       </div>
     </div>
-
   );
 }
 

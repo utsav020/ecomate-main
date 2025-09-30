@@ -25,7 +25,7 @@ function DemoContent() {
               <span className="design">Owner & Founder</span>
             </div>
           </div>
-          <div className="tab-button-area-setting">
+          <div className="tab-button-area-setting bg-white">
             <ul className="nav nav-tabs" id="myTab" role="tablist">
               <li className="nav-item" role="presentation">
                 <button
