@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import axios from "axios";
 import { API_BASE_URL } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 const AddProductPage = () => {
+  const router = useRouter();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [categories, setCategories] = useState<
     { category_id: number; categoryName: string }[]
@@ -28,6 +29,7 @@ const AddProductPage = () => {
         weights: "",
         quantity: "",
         is_default: true,
+        image: null,
       },
     ],
   });
@@ -40,9 +42,9 @@ const AddProductPage = () => {
           `${API_BASE_URL}/api/categories/getallcategory`
         );
 
-        if (response.data && Array.isArray(response.data)) {
+        if (Array.isArray(response.data)) {
           setCategories(response.data);
-        } else if (response.data.categories) {
+        } else if (response.data?.categories) {
           setCategories(response.data.categories);
         } else {
           setCategories([]);
@@ -62,10 +64,10 @@ const AddProductPage = () => {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { id, value } = e.target;
+    const { id, type, value, checked } = e.target as HTMLInputElement;
     setFormData((prev) => ({
       ...prev,
-      [id]: value,
+      [id]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -80,6 +82,32 @@ const AddProductPage = () => {
     setFormData((prev) => ({ ...prev, variants: newVariants }));
   };
 
+  // ✅ Add variant
+  const addVariant = () => {
+    setFormData((prev) => ({
+      ...prev,
+      variants: [
+        ...prev.variants,
+        {
+          productCategoryName: "",
+          regularPrice: "",
+          salePrice: "",
+          weights: "",
+          quantity: "",
+          is_default: false,
+          image: null,
+        },
+      ],
+    }));
+  };
+
+  // ✅ Remove variant
+  const removeVariant = (index: number) => {
+    const newVariants = [...formData.variants];
+    newVariants.splice(index, 1);
+    setFormData((prev) => ({ ...prev, variants: newVariants }));
+  };
+
   // ✅ Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,12 +118,17 @@ const AddProductPage = () => {
       const payload = {
         ...formData,
         category_id: Number(formData.category_id),
-        variants: formData.variants.map((v) => ({
-          ...v,
-          regularPrice: Number(v.regularPrice),
-          salePrice: Number(v.salePrice),
-          quantity: Number(v.quantity),
-        })),
+        regularPrice: Number(formData.regularPrice),
+        salePrice: Number(formData.salePrice),
+        quantity: Number(formData.quantity),
+        variants: formData.has_variants
+          ? formData.variants.map((v) => ({
+              ...v,
+              regularPrice: Number(v.regularPrice),
+              salePrice: Number(v.salePrice),
+              quantity: Number(v.quantity),
+            }))
+          : [],
       };
 
       const response = await axios.post(
@@ -109,60 +142,8 @@ const AddProductPage = () => {
       console.log("✅ Product submitted successfully:", response.data);
       alert("Product submitted successfully!");
 
-      // Handle variant change
-      const handleVariantChange = (
-        index: number,
-        field: string,
-        value: string | boolean
-      ) => {
-        const newVariants = [...formData.variants];
-        (newVariants[index] as any)[field] = value;
-        setFormData((prev) => ({ ...prev, variants: newVariants }));
-      };
-
-      // Add variant
-      const addVariant = () => {
-        setFormData((prev) => ({
-          ...prev,
-          variants: [
-            ...prev.variants,
-            {
-              productCategoryName: "",
-              regularPrice: "",
-              salePrice: "",
-              weights: "",
-              quantity: "",
-              is_default: false,
-              image: null,
-            },
-          ],
-        }));
-      };
-
-      // Remove variant
-      const removeVariant = (index: number) => {
-        const newVariants = [...formData.variants];
-        newVariants.splice(index, 1);
-        setFormData((prev) => ({ ...prev, variants: newVariants }));
-      };
-
-      // Reset form
-      // setFormData({
-      //   category_id: "",
-      //   productName: "",
-      //   description: "",
-      //   has_variants: false,
-      //   variants: [
-      //     {
-      //       productCategoryName: "",
-      //       regularPrice: "",
-      //       salePrice: "",
-      //       weights: "",
-      //       quantity: "",
-      //       is_default: true,
-      //     },
-      //   ],
-      // });
+      // Redirect after success
+      router.push("/dashboard/product-list");
     } catch (error: any) {
       console.error("❌ Error submitting product:", error);
       setErrorMsg(
@@ -251,9 +232,7 @@ const AddProductPage = () => {
                     onChange={handleInputChange}
                     className="border border-gray-300"
                   >
-                    <option value="" className="border border-gray-300">
-                      Select category
-                    </option>
+                    <option value="">Select category</option>
                     {categories.map((cat) => (
                       <option key={cat.category_id} value={cat.category_id}>
                         {cat.categoryName}
@@ -264,118 +243,146 @@ const AddProductPage = () => {
 
                 {/* Variants */}
                 {formData.has_variants ? (
-                  formData.variants.map((variant, index) => (
-                    <div key={index} className="">
-                      <div className="single-input">
-                        <input
-                          type="text"
-                          placeholder="Variant Name"
-                          value={variant.productCategoryName}
-                          onChange={(e) =>
-                            handleVariantChange(
-                              index,
-                              "productCategoryName",
-                              e.target.value
-                            )
-                          }
-                        />
+                  <>
+                    {formData.variants.map((variant, index) => (
+                      <div
+                        key={index}
+                        className="border p-3 rounded-md mb-3 bg-gray-50"
+                      >
+                        <div className="single-input">
+                          <label>Variant Name</label>
+                          <input
+                            type="text"
+                            placeholder="Variant Name"
+                            value={variant.productCategoryName}
+                            onChange={(e) =>
+                              handleVariantChange(
+                                index,
+                                "productCategoryName",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="single-input">
+                          <label>Regular Price</label>
+                          <input
+                            type="number"
+                            placeholder="Regular Price"
+                            value={variant.regularPrice}
+                            onChange={(e) =>
+                              handleVariantChange(
+                                index,
+                                "regularPrice",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="single-input">
+                          <label>Sale Price</label>
+                          <input
+                            type="number"
+                            placeholder="Sale Price"
+                            value={variant.salePrice}
+                            onChange={(e) =>
+                              handleVariantChange(
+                                index,
+                                "salePrice",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="single-input">
+                          <label>Weight</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 500g"
+                            value={variant.weights}
+                            onChange={(e) =>
+                              handleVariantChange(
+                                index,
+                                "weights",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="single-input">
+                          <label>Quantity</label>
+                          <input
+                            type="number"
+                            placeholder="Quantity"
+                            value={variant.quantity}
+                            onChange={(e) =>
+                              handleVariantChange(
+                                index,
+                                "quantity",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        {/* <button
+                          type="button"
+                          className="mt-2 text-red-500"
+                          onClick={() => removeVariant(index)}
+                        >
+                          Remove Variant
+                        </button> */}
                       </div>
-                      <div className="single-input">
-                        <input
-                          type="number"
-                          placeholder="Regular Price"
-                          value={variant.regularPrice}
-                          onChange={(e) =>
-                            handleVariantChange(
-                              index,
-                              "regularPrice",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="single-input">
-                        <input
-                          type="number"
-                          placeholder="Sale Price"
-                          value={variant.salePrice}
-                          onChange={(e) =>
-                            handleVariantChange(
-                              index,
-                              "salePrice",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="single-input">
-                        <input
-                          type="text"
-                          placeholder="Weight (e.g. 1kg)"
-                          value={variant.weights}
-                          onChange={(e) =>
-                            handleVariantChange(
-                              index,
-                              "weights",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="single-input">
-                        <input
-                          type="number"
-                          placeholder="Quantity"
-                          value={variant.quantity}
-                          onChange={(e) =>
-                            handleVariantChange(
-                              index,
-                              "quantity",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                  ))
+                    ))}
+                    <button
+                      type="button"
+                      className="rts-btn btn-primary"
+                      onClick={addVariant}
+                    >
+                      + Add Another Variant
+                    </button>
+                  </>
                 ) : (
                   <>
                     <div className="single-input">
-                          <input
-                            type="number"
-                            id="regularPrice"
-                            placeholder="Regular Price"
-                            value={formData.regularPrice}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        <div className="single-input">
-                          <input
-                            type="number"
-                            id="salePrice"
-                            placeholder="Sale Price"
-                            value={formData.salePrice}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        <div className="single-input">
-                          <input
-                            type="text"
-                            id="weights"
-                            placeholder="Weight (e.g. 500g)"
-                            value={formData.weights}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        <div className="single-input">
-                          <input
-                            type="number"
-                            id="quantity"
-                            placeholder="Quantity"
-                            value={formData.quantity}
-                            onChange={handleInputChange}
-                          />
-                        </div>
+                      <label htmlFor="regularPrice">Regular Price</label>
+                      <input
+                        type="number"
+                        id="regularPrice"
+                        placeholder="Regular Price"
+                        value={formData.regularPrice}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="single-input">
+                      <label htmlFor="salePrice">Sale Price</label>
+                      <input
+                        type="number"
+                        id="salePrice"
+                        placeholder="Sale Price"
+                        value={formData.salePrice}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="single-input">
+                      <label htmlFor="weights">Weights</label>
+                      <input
+                        type="text"
+                        id="weights"
+                        placeholder="Weight (e.g. 500g)"
+                        value={formData.weights}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="single-input">
+                      <label htmlFor="quantity">Quantity</label>
+                      <input
+                        type="number"
+                        id="quantity"
+                        placeholder="Quantity"
+                        value={formData.quantity}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </>
                 )}
 
@@ -391,7 +398,7 @@ const AddProductPage = () => {
                 </div>
 
                 {/* Submit */}
-                <div className="button-area-botton-wrapper-p-list">
+                <div className="button-area-botton-wrapper-p-list mt-[20px]">
                   <button type="submit" className="rts-btn btn-primary">
                     Save
                   </button>
