@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ComponentName() {
+function  ComponentName() {
   return (
     <div>
 <div className="rts-shorts-service-area rts-section-gap bg_primary">

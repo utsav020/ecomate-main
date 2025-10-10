@@ -173,7 +173,7 @@ const AddEditCategoryPage: React.FC<Props> = ({
                   <div className="button-area-botton-wrapper-p-list">
                     <button
                       type="button"
-                      onClick={onClose}
+                      onClick={onClose} 
                       className="rts-btn btn-primary bg-transparent"
                     >
                       Cancel

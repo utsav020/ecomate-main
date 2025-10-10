@@ -2,23 +2,15 @@
 
 import { API_BASE_URL } from "@/lib/api";
 import axios from "axios";
-import {
-  Eye,
-  SquarePen,
-  Trash2,
-  Search,
-  Plus,
-  Filter,
-  Download,
-} from "lucide-react";
+import { Eye, SquarePen, Trash2, Search, Plus, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import DataTable, { TableColumn } from "react-data-table-component";
 import ProductViewModal from "./ProductViewModal";
 
 interface Variant {
-  product_category_id: number;
-  productCategoryName: string;
+  product_variant_id: number;
+  productVariantName: string;
   regularPrice: string;
   salePrice: string;
   weights: string;
@@ -76,33 +68,42 @@ const ProductTable = () => {
     fetchAllProducts();
   }, []);
 
-  // View single product by ID
-  const handleView = async (productId: number) => {
-    try {
-      const res = await axios.get(
-        `${API_BASE_URL}/api/product/getproductbyid/${productId}`
+  // View single product or variant
+  const handleView = (row: TableRow) => {
+    if (row.isVariant) {
+      const parentProduct = products.find(
+        (p) => p.product_id === row.categoryId
       );
-      setViewProduct(res.data);
-    } catch (err) {
-      console.error("Error fetching product:", err);
+      if (parentProduct && parentProduct.variants) {
+        const variant = parentProduct.variants.find(
+          (v) => v.product_variant_id === parseInt(row.id.replace("v-", ""))
+        );
+        if (variant) {
+          setViewProduct({ ...parentProduct, variants: [variant] });
+        }
+      }
+    } else {
+      const product = products.find(
+        (p) => p.product_id === parseInt(row.id.replace("p-", ""))
+      );
+      if (product) setViewProduct(product);
     }
   };
 
   // Delete product
-  const handleDelete = async (productId: number) => {
+  const handleDelete = async (row: TableRow) => {
+    const id = parseInt(row.id.replace("p-", "").replace("v-", ""));
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await axios.delete(
-          `${API_BASE_URL}/api/product/deleteproduct/${productId}`
-        );
-        fetchAllProducts(); // Refresh the list
+        await axios.delete(`${API_BASE_URL}/api/product/deleteproduct/${id}`);
+        fetchAllProducts();
       } catch (err) {
         console.error("Error deleting product:", err);
       }
     }
   };
 
-  // Get status based on quantity
+  // Get stock status
   const getStatus = (quantity: string | number | null): string => {
     const qty = parseInt(quantity as string) || 0;
     if (qty === 0) return "out-of-stock";
@@ -110,7 +111,7 @@ const ProductTable = () => {
     return "in-stock";
   };
 
-  // Flatten products and variants for DataTable
+  // Flatten products and variants for table
   const getTableData = (): TableRow[] => {
     const rows: TableRow[] = [];
 
@@ -126,15 +127,15 @@ const ProductTable = () => {
         status: getStatus(p.quantity),
       });
 
-      if (p.has_variants && p.variants && p.variants.length > 0) {
+      if (p.has_variants && p.variants?.length) {
         p.variants.forEach((v) => {
           rows.push({
-            id: `v-${v.product_category_id}`,
-            name: `${v.productCategoryName}`,
+            id: `v-${v.product_variant_id}`,
+            name: v.productVariantName,
             regularPrice: v.regularPrice,
             salePrice: v.salePrice,
             quantity: v.quantity,
-            categoryId: p.category_id,
+            categoryId: p.product_id,
             isVariant: true,
             status: getStatus(v.quantity),
           });
@@ -177,7 +178,6 @@ const ProductTable = () => {
           )}
         </div>
       ),
-      minWidth: "250px",
     },
     {
       name: "REGULAR PRICE",
@@ -186,9 +186,7 @@ const ProductTable = () => {
       cell: (row) => (
         <span className="text-gray-600 text-md font-medium">
           {row.regularPrice
-            ? `₹${parseFloat(row.regularPrice as string).toLocaleString(
-                "en-IN"
-              )}`
+            ? `₹${parseFloat(row.regularPrice as string).toLocaleString("en-IN")}`
             : "-"}
         </span>
       ),
@@ -241,20 +239,10 @@ const ProductTable = () => {
       sortable: true,
       cell: (row) => {
         const statusConfig = {
-          "in-stock": {
-            label: "In Stock",
-            class: "bg-green-100 text-green-800",
-          },
-          "low-stock": {
-            label: "Low Stock",
-            class: "bg-yellow-100 text-yellow-800",
-          },
-          "out-of-stock": {
-            label: "Out of Stock",
-            class: "bg-red-100 text-red-800",
-          },
+          "in-stock": { label: "In Stock", class: "bg-green-100 text-green-800" },
+          "low-stock": { label: "Low Stock", class: "bg-yellow-100 text-yellow-800" },
+          "out-of-stock": { label: "Out of Stock", class: "bg-red-100 text-red-800" },
         };
-
         const config = statusConfig[row.status as keyof typeof statusConfig];
         return (
           <span
@@ -268,27 +256,29 @@ const ProductTable = () => {
     {
       name: "ACTIONS",
       cell: (row) => {
-        const productId = parseInt(row.id.replace("p-", "").replace("v-", ""));
-        const isVariant = row.id.startsWith("v-");
+        const productId = row.isVariant
+          ? row.categoryId // if variant, edit parent product
+          : parseInt(row.id.replace("p-", ""));
 
         return (
           <div className="flex space-x-2">
             <button
-              onClick={() => handleView(productId)}
-              className="p-2  hover:bg-blue-50 rounded-lg transition-colors duration-200"
+              onClick={() => handleView(row)}
+              className="p-2 hover:bg-blue-50 rounded-lg transition-colors duration-200"
               title="View Details"
             >
               <Eye className="text-blue-600" size={24} />
             </button>
             <button
-              className="p-2  hover:bg-green-50 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-green-50 rounded-lg transition-colors duration-200"
               title="Edit Product"
+              onClick={() => router.push(`/dashboard/edit-product/${productId}`)}
             >
               <SquarePen className="text-green-600" size={24} />
             </button>
             <button
-              onClick={() => handleDelete(productId)}
-              className="p-2  hover:bg-red-50 rounded-lg transition-colors duration-200"
+              onClick={() => handleDelete(row)}
+              className="p-2 hover:bg-red-50 rounded-lg transition-colors duration-200"
               title="Delete Product"
             >
               <Trash2 className="text-red-600" size={24} />
@@ -296,7 +286,7 @@ const ProductTable = () => {
           </div>
         );
       },
-      minWidth: "150px",
+      // minWidth: "150px",
     },
   ];
 
@@ -321,39 +311,6 @@ const ProductTable = () => {
     selectedStatus === "all"
       ? filteredItems
       : filteredItems.filter((item) => item.status === selectedStatus);
-
-  const customStyles = {
-    headRow: {
-      style: {
-        backgroundColor: "#f8fafc",
-        borderBottomWidth: "1px",
-        borderBottomColor: "#e2e8f0",
-        fontWeight: "600",
-      },
-    },
-    headCells: {
-      style: {
-        fontSize: "14px",
-        fontWeight: "600",
-        color: "#374151",
-        textTransform: "uppercase" as const,
-        letterSpacing: "0.05em",
-      },
-    },
-    rows: {
-      style: {
-        fontSize: "14px",
-        "&:not(:last-of-type)": {
-          borderBottomWidth: "1px",
-          borderBottomColor: "#f1f5f9",
-        },
-      },
-      highlightOnHoverStyle: {
-        backgroundColor: "#f8fafc",
-        borderBottomColor: "#e2e8f0",
-      },
-    },
-  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -386,7 +343,7 @@ const ProductTable = () => {
                   Total Products
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {products.length}
+                  {products.length + products.reduce((acc, p) => acc + (p.variants?.length || 0), 0)}
                 </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
@@ -553,12 +510,12 @@ const ProductTable = () => {
                 {selectedStatus === "low-stock" && "Low Stock"}
                 {selectedStatus === "out-of-stock" && "Out of Stock"}
                 <div className="">
-                    <button
-                  onClick={() => setSelectedStatus("all")}
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  ×
-                </button>
+                  <button
+                    onClick={() => setSelectedStatus("all")}
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    ×
+                  </button>
                 </div>
               </div>
             </div>
@@ -569,35 +526,14 @@ const ProductTable = () => {
       {/* Data Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <DataTable
-          columns={columns}
-          data={statusFilteredItems}
-          pagination
-          paginationPerPage={10}
-          paginationRowsPerPageOptions={[10, 25, 50, 100]}
-          highlightOnHover
-          pointerOnHover
-          progressPending={isLoading}
-          customStyles={customStyles}
-          noDataComponent={
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Search size={48} className="mx-auto" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No products found
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Try adjusting your search or filter criteria
-              </p>
-              <button
-                onClick={() => router.push("/dashboard/add-product")}
-                className="bg-blue-600 hover:bg-blue-700 text-black px-6 py-2 rounded-lg font-medium transition-colors duration-200"
-              >
-                Add Your First Product
-              </button>
-            </div>
-          }
-        />
+        columns={columns}
+        data={statusFilteredItems}
+        pagination
+        paginationPerPage={10}
+        highlightOnHover
+        progressPending={isLoading}
+        noDataComponent={<div className="p-10 text-gray-600">No products found</div>}
+      />
       </div>
 
       {viewProduct && (

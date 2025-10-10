@@ -1,17 +1,27 @@
 "use client";
 
 import React from "react";
-import { X, SquarePen, Eye, Trash2 } from "lucide-react";
+import { X, Package, Tag, Scale, Info, ImageIcon, Layers } from "lucide-react";
 
+interface VariantImage {
+  image_id: number;
+  image_url: string;
+}
 
 interface Variant {
-  product_category_id: number;
-  productCategoryName: string;
+  product_variant_id: number;
+  productVariantName: string;
   regularPrice: string;
   salePrice: string;
   weights: string;
   quantity: number;
   is_default: number;
+  images?: VariantImage[];
+}
+
+interface ProductImage {
+  image_id: number;
+  image_url: string;
 }
 
 interface Product {
@@ -24,6 +34,7 @@ interface Product {
   quantity: string | number | null;
   description: string;
   has_variants: number;
+  images?: ProductImage[];
   variants?: Variant[];
 }
 
@@ -51,48 +62,127 @@ const ProductViewModal: React.FC<Props> = ({ product, onClose }) => {
     return Math.round(((reg - sal) / reg) * 100);
   };
 
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0)
+      return {
+        text: "Out of Stock",
+        color: "text-red-600",
+        bg: "bg-red-50",
+        border: "border-red-200",
+      };
+    if (quantity < 10)
+      return {
+        text: "Low Stock",
+        color: "text-orange-600",
+        bg: "bg-orange-50",
+        border: "border-orange-200",
+      };
+    return {
+      text: "In Stock",
+      color: "text-green-600",
+      bg: "bg-green-50",
+      border: "border-gray-200",
+    };
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] max-h-[90vh] overflow-hidden animate-scale-in">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex transition-all duration-500 hover:shadow-md hover:scale-[1.02] justify-center items-center z-50 p-4 ease-in-out">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden animate-slide-up">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-          <div className="flex w-full justify-between items-start">
-            <div className="">
-              <h2 className="text-2xl font-bold mb-1">{product.productName}</h2>
-              <p className="text-white font-bold">
-                Product ID: #{product.product_id}
-              </p>
+        <div className="relative bg-emerald-100 p-8 text-black">
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={onClose}
+              className="text-black p-3 rounded-2xl transition-all duration-300 transform hover:scale-110"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="bg-green-400 text-white p-3 rounded-2xl backdrop-blur-sm">
+              <Package size={28} />
             </div>
-            <div className="">
-              <button
-                onClick={onClose}
-                className="bg-white/20 text-white hover:bg-white/30 p-2 rounded-full transition-all duration-200 transform hover:scale-110"
-              >
-                <X />
-              </button>
+            <div>
+              <h2 className="text-3xl font-bold mb-2">{product.productName}</h2>
+              <div className="flex items-center space-x-4 text-black">
+                <span className="px-3 py-1 rounded-full text-[14px] font-medium bg-emerald-50">
+                  ID: #{product.product_id}
+                </span>
+                <span
+                  className={`px-3 py-1 rounded-full text-white text-[12px] font-medium backdrop-blur-sm ${
+                    product.has_variants ? "bg-green-500" : "bg-blue-500"
+                  }`}
+                >
+                  {product.has_variants ? "With Variants" : "Single Product"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
-          {/* Price Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-700 mb-3 flex items-center">
-                Pricing Information
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Regular Price:</span>
-                  <span className="font-semibold">
+        <div className="p-8 overflow-y-auto max-h-[70vh] custom-scrollbar space-y-8">
+          {/* Product Images Gallery */}
+          {product.images && product.images.length > 0 && (
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-blue-500 p-2 rounded-lg">
+                  <ImageIcon size={20} className="text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Product Gallery
+                </h3>
+                <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded-full text-sm">
+                  {product.images.length} images
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {product.images.map((img, index) => (
+                  <div key={img.image_id} className="relative group">
+                    <img
+                      src={img.image_url}
+                      alt={product.productName}
+                      className="w-full h-24 object-cover rounded-xl border-2 border-gray-200 group-hover:border-blue-500 transition-all duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-xl transition-all duration-300 flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 font-medium text-sm">
+                        View {index + 1}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Key Information Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Pricing Card */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-blue-500 p-2 rounded-lg">
+                  <Tag size={20} className="text-white" />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-800">
+                  Pricing Information
+                </h4>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-blue-100">
+                  <span className="text-gray-600 font-medium">
+                    Regular Price
+                  </span>
+                  <span className="text-lg font-bold text-gray-800">
                     {formatPrice(product.regularPrice)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Sale Price:</span>
+
+                <div className="flex justify-between items-center py-2 border-b border-blue-100">
+                  <span className="text-gray-600 font-medium">Sale Price</span>
                   <span
-                    className={`font-bold ${
+                    className={`text-xl font-bold ${
                       hasDiscount(product.regularPrice, product.salePrice)
                         ? "text-green-600"
                         : "text-gray-800"
@@ -101,49 +191,83 @@ const ProductViewModal: React.FC<Props> = ({ product, onClose }) => {
                     {formatPrice(product.salePrice)}
                   </span>
                 </div>
+
                 {hasDiscount(product.regularPrice, product.salePrice) &&
                   product.regularPrice &&
                   product.salePrice && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">You Save:</span>
-                      <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm font-bold">
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                      <span className="text-red-600 font-bold text-[16px]">
+                        Save{" "}
                         {calculateDiscount(
                           product.regularPrice,
                           product.salePrice
                         )}
-                        % OFF
+                        %
                       </span>
+                      <div className="text-red-500 text-md mt-1">
+                        You save ₹
+                        {(
+                          parseFloat(product.regularPrice) -
+                          parseFloat(product.salePrice)
+                        ).toLocaleString("en-IN")}
+                      </div>
                     </div>
                   )}
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-700 mb-3 flex items-center">
-                Stock Information
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Quantity:</span>
-                  <span
-                    className={`font-bold ${
-                      parseInt(product.quantity as string) > 0
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {product.quantity ?? "0"}
-                  </span>
+            {/* Stock & Details Card */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+              <div className="flex space-x-3 h-[70px] mb-4">
+                <div className="bg-green-500 p-2 h-[30px] rounded-lg">
+                  <Package size={20} className="text-white" />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Weight:</span>
-                  <span className="font-semibold">
+                <div className="pt-2">
+                  <h4 className="text-xl font-semibold text-gray-800">
+                    Stock & Details
+                  </h4>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-green-100">
+                  <span className="text-gray-600 font-medium">Quantity</span>
+                  <div className="text-right">
+                    <span
+                      className={`text-[14px] font-bold ${
+                        getStockStatus(parseInt(product.quantity as string))
+                          .color
+                      }`}
+                    >
+                      {product.quantity ?? 0}
+                    </span>
+                    <div
+                      className={`text-[14px] ${
+                        getStockStatus(parseInt(product.quantity as string))
+                          .color
+                      } font-medium`}
+                    >
+                      {
+                        getStockStatus(parseInt(product.quantity as string))
+                          .text
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center py-2 border-b border-green-100">
+                  <span className="text-gray-600 font-medium flex items-center space-x-2">
+                    <Scale size={16} />
+                    <span>Weight</span>
+                  </span>
+                  <span className="font-semibold text-gray-800">
                     {product.weights || "-"}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Category ID:</span>
-                  <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-md font-medium">
+
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-600 font-medium">Category ID</span>
+                  <span className="bg-blue-500 text-white px-3 py-1 rounded-full font-medium text-[14px]">
                     #{product.category_id}
                   </span>
                 </div>
@@ -152,82 +276,112 @@ const ProductViewModal: React.FC<Props> = ({ product, onClose }) => {
           </div>
 
           {/* Description */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-700 mb-3 flex items-center">
-              Product Description
-            </h3>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-gray-700 leading-relaxed">
+          <div className="bg-emerald-50 hover:border-green-400 border-2 rounded-2xl p-6 border-purple-100">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="bg-purple-500 p-2 rounded-lg">
+                <Info size={20} className="text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800">
+                Product Description
+              </h3>
+            </div>
+            <div className="bg-white/50 rounded-xl p-4 border border-purple-200">
+              <p className="text-gray-700 leading-relaxed text-lg">
                 {product.description}
               </p>
             </div>
           </div>
 
           {/* Variants Section */}
-          {product.has_variants &&
-            product.variants &&
-            product.variants.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-2 text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                  Product Variants ({product.variants.length})
-                </h3>
-                <div className="space-y-3">
-                  {product.variants.map((variant, index) => (
+          {product.has_variants && product.variants && (
+            <div className="rounded-2xl p-6 border border-orange-100">
+              <div className="flex space-x-3 h-[50px] mb-6">
+                <div className="bg-orange-500 mt-[10px] h-[30px] p-2 rounded-lg">
+                  <Layers size={20} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Product Variants
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {product.variants.length} variants available
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {product.variants.map((variant, idx) => {
+                  const variantStockStatus = getStockStatus(variant.quantity);
+                  return (
                     <div
-                      key={variant.product_category_id}
-                      className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200"
+                      key={variant.product_variant_id}
+                      className="bg-white rounded-xl hover:border-green-500 p-5 border-2"
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex gap-3 h-15">
-                          <div className="bg-blue-100 flex items-center justify-center w-10 h-10 rounded-full">
-                            <span className="text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-md font-bold mr-0">
-                            {index + 1}
-                          </span>
+                      <div className="flex w-full flex-col lg:flex-row justify-between mb-4">
+                        <div className="flex w-full items-center space-x-4 mb-3 lg:mb-0">
+                          <div className="flex w-full items-center justify-between">
+                            <div className="flex gap-3 w-auto">
+                              <div className="bg-green-500 mt-2 text-white w-9 h-8.5 rounded-full flex items-center justify-center font-bold">
+                                {idx + 1}
+                              </div>
+                              <div className="w-auto font-bold p-2 rounded-lg">
+                                <h5 className="">{variant.productVariantName}</h5>
+                              </div>
+                            </div>
+
+                            <div className="flex w-auto items-center justify-center ">
+                                <span
+                                  className={`${variantStockStatus.bg} ${variantStockStatus.color} px-2 py-1 rounded-full text-[13px] ${variantStockStatus.border} font-medium`}
+                                >
+                                  {variantStockStatus.text}
+                                </span>
+                              </div>
                           </div>
-                          <h4 className="font-semibold text-gray-800">
-                            {variant.productCategoryName}
-                          </h4>
-                          {variant.is_default === 1 && (
-                            <span className="ml-2 w-18 text-center h-7 bg-green-100 text-green-600 px-2 py-1 rounded-full text-sm font-medium">
-                              Default
-                            </span>
-                          )}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-md">
-                        <div>
-                          <span className="text-gray-500">Regular:</span>
-                          <p className="font-medium">
+                      {/* Variant Images */}
+                      {variant.images && variant.images.length > 0 && (
+                        <div className="mb-4">
+                          <div className="flex space-x-2 overflow-x-auto pb-2">
+                            {variant.images.map((img) => (
+                              <img
+                                key={img.image_id}
+                                src={img.image_url}
+                                alt={variant.productVariantName}
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-200 hover:border-orange-500 transition-all duration-300"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[14px]">
+                        <div className="text-center bg-gray-50 rounded-lg p-3">
+                          <div className="text-gray-500 font-medium">
+                            Regular
+                          </div>
+                          <div className="font-bold text-gray-800">
                             {formatPrice(variant.regularPrice)}
-                          </p>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-gray-500">Sale:</span>
-                          <p className="font-medium text-green-600">
+                        <div className="text-center bg-green-50 rounded-lg p-3">
+                          <div className="text-gray-500 font-medium">Sale</div>
+                          <div className="font-bold text-green-600">
                             {formatPrice(variant.salePrice)}
-                          </p>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-gray-500">Weight:</span>
-                          <p className="font-medium">{variant.weights}</p>
+                        <div className="text-center bg-blue-50 rounded-lg p-3">
+                          <div className="text-gray-500 font-medium">
+                            Weight
+                          </div>
+                          <div className="font-bold text-gray-800">
+                            {variant.weights}
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-gray-500">Stock:</span>
-                          <p
+                        <div className="text-center bg-red-50 rounded-lg p-3">
+                          <div className="text-gray-500 font-medium">Stock</div>
+                          <div
                             className={`font-bold ${
                               variant.quantity > 0
                                 ? "text-green-600"
@@ -235,26 +389,15 @@ const ProductViewModal: React.FC<Props> = ({ product, onClose }) => {
                             }`}
                           >
                             {variant.quantity}
-                          </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            )}
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-4 bg-gray-50">
-          <div className="flex justify-end">
-            <button
-              onClick={onClose}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
-            >
-              Close
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
