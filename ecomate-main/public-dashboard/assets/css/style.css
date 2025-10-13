@@ -50,7 +50,6 @@
 :root {
   --color-primary: #629D23;
   --color-secondary: #1F1F25;
-  --color-body: #6E777D;
   --color-heading-1: #2C3C28;
   --color-white: #fff;
   --color-success: #3EB75E;
@@ -117,7 +116,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: "Barlow", sans-serif;
-  color: var(--color-body);
+  /* color: var(--color-body); */
   font-weight: var(--p-regular);
   position: relative;
   overflow-x: hidden;
@@ -351,7 +350,7 @@ p {
   font-size: var(--font-size-b2);
   line-height: var(--line-height-b2);
   font-weight: var(--p-regular);
-  color: var(--color-body);
+  /* color: var(--color-body); */
   margin: 0 0 40px;
 }
 
@@ -475,7 +474,7 @@ ul {
 ul.liststyle.bullet li {
   font-size: 18px;
   line-height: 30px;
-  color: var(--color-body);
+  /* color: var(--color-body); */
   position: relative;
   padding-left: 30px;
 }
@@ -506,7 +505,7 @@ ul li {
   line-height: var(--line-height-b1);
   margin-top: 10px;
   margin-bottom: 10px;
-  color: var(--color-body);
+  /* color: var(--color-body); */
 }
 
 ul li a {
@@ -529,7 +528,7 @@ ol {
 ol li {
   font-size: var(--font-size-b1);
   line-height: var(--line-height-b1);
-  color: var(--color-body);
+  /* color: var(--color-body); */
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -9244,7 +9243,7 @@ pre {
   white-space: pre;
   white-space: pre-wrap;
   word-wrap: break-word;
-  color: var(--color-body);
+  /* color: var(--color-body); */
   background: var(--color-lighter);
 }
 
@@ -9507,7 +9506,6 @@ textarea {
   background: transparent;
   border: 1px solid var(--color-border);
   transition: all 0.4s ease-out 0s;
-  color: var(--color-body);
   width: 100%;
 }
 

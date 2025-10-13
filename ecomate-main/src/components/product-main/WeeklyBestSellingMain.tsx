@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import ProductDetails from "@/components/modal/ProductDetails";
 import CompareModal from "@/components/modal/CompareModal";
 import { useCart } from "@/components/header/CartContext";
 import { useWishlist } from "@/components/header/WishlistContext";
-import { useCompare } from '@/components/header/CompareContext';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useCompare } from "@/components/header/CompareContext";
+import { toast, Slide } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface BlogGridMainProps {
   Slug: string;
@@ -23,8 +22,7 @@ const BlogGridMain: React.FC<BlogGridMainProps> = ({
   ProductTitle,
   Price,
 }) => {
-  
-  type ModalType = 'one' | 'two' | 'three' | null;
+  type ModalType = "one" | "two" | "three" | null;
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const handleClose = () => setActiveModal(null);
 
@@ -33,185 +31,213 @@ const BlogGridMain: React.FC<BlogGridMainProps> = ({
   const { addToCompare } = useCompare();
 
   const [added, setAdded] = useState(false);
-  const [wishlisted, setWishlisted] = useState(false);
+
+  // ✅ Toast helper
+  const notify = (
+    message: string,
+    type: "success" | "info" | "warning" | "error" = "success"
+  ) => {
+    toast[type](message, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Slide,
+    });
+  };
 
   const handleAdd = () => {
     addToCart({
       id: Date.now(),
       image: `/assets/images/grocery/${ProductImage}`,
-      title: ProductTitle ?? 'Default Product Title',
-      price: parseFloat(Price ?? '0'),
+      title: ProductTitle ?? "Default Product Title",
+      price: parseFloat(Price ?? "0"),
       quantity: 1,
       active: true,
     });
     setAdded(true);
-    setTimeout(() => setAdded(false), 5000);
+    notify("🛒 Added to Cart!", "success");
   };
 
   const handleWishlist = () => {
     addToWishlist({
       id: Date.now(),
       image: `/assets/images/grocery/${ProductImage}`,
-      title: ProductTitle ?? 'Default Product Title',
-      price: parseFloat(Price ?? '0'),
+      title: ProductTitle ?? "Default Product Title",
+      price: parseFloat(Price ?? "0"),
       quantity: 1,
     });
-    setWishlisted(true);
-    setTimeout(() => setWishlisted(false), 3000);
+    notify("❤️ Added to Wishlist!", "success");
   };
 
   const handleCompare = () => {
     addToCompare({
       image: `/assets/images/grocery/${ProductImage}`,
-      name: ProductTitle ?? 'Default Product Title',
-      price: Price ?? '0',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+      name: ProductTitle ?? "Default Product Title",
+      price: Price ?? "0",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
       rating: 5,
       ratingCount: 25,
-      weight: '500g',
+      weight: "500g",
       inStock: true,
     });
+    notify("📊 Added to Compare!", "success");
   };
 
   useEffect(() => {
     const handleQuantityClick = (e: Event) => {
       const button = e.currentTarget as HTMLElement;
-      const parent = button.closest('.quantity-edit') as HTMLElement | null;
+      const parent = button.closest(".quantity-edit") as HTMLElement | null;
       if (!parent) return;
 
-      const input = parent.querySelector('.input') as HTMLInputElement | null;
-      const addToCart = parent.querySelector('a.add-to-cart') as HTMLElement | null;
+      const input = parent.querySelector(".input") as HTMLInputElement | null;
+      const addToCart = parent.querySelector(
+        "a.add-to-cart"
+      ) as HTMLElement | null;
       if (!input) return;
 
-      let oldValue = parseInt(input.value || '1', 10);
+      let oldValue = parseInt(input.value || "1", 10);
       let newVal = oldValue;
 
-      if (button.classList.contains('plus')) {
-        newVal = oldValue + 1;
-      } else if (button.classList.contains('minus')) {
-        newVal = oldValue > 1 ? oldValue - 1 : 1;
-      }
+      if (button.classList.contains("plus")) newVal = oldValue + 1;
+      else if (button.classList.contains("minus"))
+        newVal = Math.max(1, oldValue - 1);
 
       input.value = newVal.toString();
-      if (addToCart) {
-        addToCart.setAttribute('data-quantity', newVal.toString());
-      }
+      if (addToCart) addToCart.setAttribute("data-quantity", newVal.toString());
     };
 
-    const buttons = document.querySelectorAll('.quantity-edit .button');
-    buttons.forEach(button => {
-      button.removeEventListener('click', handleQuantityClick);
-      button.addEventListener('click', handleQuantityClick);
+    const buttons = document.querySelectorAll(".quantity-edit .button");
+    buttons.forEach((button) => {
+      button.removeEventListener("click", handleQuantityClick);
+      button.addEventListener("click", handleQuantityClick);
     });
 
     return () => {
-      buttons.forEach(button => {
-        button.removeEventListener('click', handleQuantityClick);
-      });
+      buttons.forEach((button) =>
+        button.removeEventListener("click", handleQuantityClick)
+      );
     };
   }, []);
 
-  // tostify
-  const compare = () => toast('Successfully Add To Compare !');
-  const addcart = () => toast('Successfully Add To Cart !');
-  const wishList = () => toast('Successfully Add To Wishlist !');
-
   return (
     <>
-      <div className="image-and-action-area-wrapper">
-        <a href={`/shop/${Slug}`} className="thumbnail-preview">
-          <div className="badge">
-            <span>
-              25% <br />
-              Off
-            </span>
-            <i className="fa-solid fa-bookmark" />
+      <div className="group relative overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white transition-all hover:shadow-lg">
+        {/* Product Image */}
+        <div className="relative">
+          <a
+            href={`/shop/${Slug}`}
+            className="block overflow-hidden rounded-t-xl"
+          >
+            <div className="absolute -left-3 top-3 z-10 bg-green-500 text-center text-white text-[12px] w-[70px] font-semibold px-2 py-1 rounded-full">
+              25% Off
+            </div>
+            <img
+              src={`/assets/images/grocery/${ProductImage}`}
+              alt="grocery"
+              className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </a>
+
+          {/* Action buttons */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
+            <div className="bg-white rounded-full shadow hover:bg-gray-100 transition">
+              <button
+                title="Add To Wishlist"
+                onClick={handleWishlist}
+                className="p-2 transition"
+              >
+                <i className="fa-regular fa-heart text-gray-700 hover:text-green-500" />
+              </button>
+            </div>
+            <div className="bg-white rounded-full shadow hover:bg-gray-100 transition">
+              <button
+                title="Compare"
+                onClick={handleCompare}
+                className="p-2 "
+              >
+                <i className="fa-solid fa-arrows-retweet text-gray-700 hover:text-green-500" />
+              </button>
+            </div>
+            <div className="bg-white rounded-full shadow hover:bg-gray-100 transition">
+              <button
+                title="Quick View"
+                onClick={() => setActiveModal("two")}
+                className="p-2"
+              >
+                <i className="fa-regular fa-eye text-gray-700 hover:text-green-500" />
+              </button>
+            </div>
           </div>
-          <img src={`/assets/images/grocery/${ProductImage}`} alt="grocery" />
-        </a>
-        <div className="action-share-option">
-          <span
-            className="single-action openuptip message-show-action"
-            data-flow="up"
-            title="Add To Wishlist"
-            onClick={() => {
-              handleWishlist();
-              wishList();
-            }}
-          >
-            <i className="fa-light fa-heart" />
-          </span>
-          <span
-            className="single-action openuptip"
-            data-flow="up"
-            title="Compare"
-            onClick={() => {
-              handleCompare();
-              compare();
-            }}
-          >
-            <i className="fa-solid fa-arrows-retweet" />
-          </span>
-          <span
-            className="single-action openuptip cta-quickview product-details-popup-btn"
-            data-flow="up"
-            title="Quick View"
-            onClick={() => setActiveModal('two')}
-          >
-            <i className="fa-regular fa-eye" />
-          </span>
-        </div>
-      </div>
-
-      <div className="body-content">
-        <a href={`/shop/${Slug}`}>
-          <h4 className="title">{ProductTitle ?? 'How to growing your business'}</h4>
-        </a>
-        <span className="availability">500g Pack</span>
-        <div className="price-area">
-          <span className="current">{`$${Price}`}</span>
-          <div className="previous">$36.00</div>
         </div>
 
-        <div className="cart-counter-action">
-          <div className="quantity-edit">
-            <input type="text" className="input" defaultValue={1} />
-            <div className="button-wrapper-action">
-              <button className="button minus">
+        {/* Product Info */}
+        <div className="p-4 space-y-3">
+          <a href={`/shop/${Slug}`}>
+            <h4 className="text-base max-w-sm mx-auto text-center w-auto font-semibold text-gray-800 hover:text-primary transition">
+              {ProductTitle ?? "How to growing your business"}
+            </h4>
+          </a>
+          {/* <span className="block text-[16px] text-gray-500">500g Pack</span> */}
+
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-[18px] font-semibold text-black">{`Rs. ${Price}`}</span>
+            <span className="text-[14px] text-gray-400 line-through">$36.00</span>
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            {/* <div className="quantity-edit flex items-center border rounded-md overflow-hidden">
+              <button className="button minus px-3 py-2 text-gray-600 hover:bg-gray-100">
                 <i className="fa-regular fa-chevron-down" />
               </button>
-              <button className="button plus">
-                +<i className="fa-regular fa-chevron-up" />
+              <input
+                type="text"
+                className="input w-10 text-center border-x outline-none text-gray-700"
+                defaultValue={1}
+              />
+              <button className="button plus px-3 py-2 text-gray-600 hover:bg-gray-100">
+                <i className="fa-regular fa-chevron-up" />
               </button>
+            </div> */}
+
+           <div className="flex items-center mx-auto justify-center h-20 max-w-xs w-full border-2 gap-4 bg-white text-black px-4 py-2 rounded-full font-medium shadow hover:bg-primary/90 transition">
+             <div className="">
+              <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handleAdd();
+              }}
+            >
+              <span>{added ? "Added" : "Add to Cart"}</span>
+            </a>
+             </div>
+            <div className="">
+              <i
+                className={
+                  added
+                    ? "fa-solid fa-check text-black"
+                    : "fa-regular fa-cart-shopping text-black"
+                }
+              />
             </div>
+           </div>
           </div>
-          <a
-            href="#"
-            className="rts-btn btn-primary add-to-card radious-sm with-icon"
-            onClick={e => {
-              e.preventDefault();
-              handleAdd();
-              addcart();
-            }}
-          >
-            <div className="btn-text">{added ? 'Added' : 'Add'}</div>
-            <div className="arrow-icon">
-              <i className={added ? "fa-solid fa-check" : "fa-regular fa-cart-shopping"} />
-            </div>
-            <div className="arrow-icon">
-              <i className={added ? "fa-solid fa-check" : "fa-regular fa-cart-shopping"} />
-            </div>
-          </a>
         </div>
       </div>
 
-      <CompareModal show={activeModal === 'one'} handleClose={handleClose} />
+      <CompareModal show={activeModal === "one"} handleClose={handleClose} />
       <ProductDetails
-        show={activeModal === 'two'}
+        show={activeModal === "two"}
         handleClose={handleClose}
         productImage={`/assets/images/grocery/${ProductImage}`}
-        productTitle={ProductTitle ?? 'Default Product Title'}
-        productPrice={Price ?? '0'}
+        productTitle={ProductTitle ?? "Default Product Title"}
+        productPrice={Price ?? "0"}
       />
     </>
   );
