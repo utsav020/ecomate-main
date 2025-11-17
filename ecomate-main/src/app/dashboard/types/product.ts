@@ -1,5 +1,6 @@
 // types/product.ts
 export interface ProductImage {
+  url: string | StaticImport;
   is_main: number;
   image_id: number;
   image_url: string;

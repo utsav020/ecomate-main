@@ -1,202 +1,273 @@
-"use client"; // optional, for client-side code
-import React, { useEffect, useState } from "react";
-import PopularProductMain from "@/components/product-main/PopularProductMain";
+"use client";
 
-interface PostType {
-  category?: string;
-  slug: string;
-  image: string;
-  title?: string;
-  author?: string;
-  price?: string;
-  publishedDate?: string;
+import React, { useEffect, useState } from "react";
+import { useCart } from "../header/CartContext";
+import { useWishlist } from "../header/WishlistContext";
+import { toast, ToastContainer } from "react-toastify";
+import { Heart } from "lucide-react";
+
+interface ProductType {
+  product_id: number | undefined;
+  _id?: string;
+  slug?: string;
+  image?: string;
+  productName?: string;
+  regularPrice?: string | number;
+  salePrice?: string | number;
+  description?: string;
 }
 
-const MyComponent: React.FC = () => {
+const PopularProducts: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("tab1");
-  const [activeModal, setActiveModal] = useState<
-    "one" | "two" | "three" | null
-  >(null);
-  const [products, setProducts] = useState<PostType[]>([]);
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(
-          "https://ekomart-backend.onrender.com/api/product/getallproducts"
-        );
-        const data = await response.json();
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, wishlistItems } = useWishlist();
+
+  // ✅ Default fallback images
+  const defaultImages = [
+    "/Soyabean.png",
+    "/Oats.png",
+    "/CornSeed.png",
+    "/Moong.png",
+    "/MultigrainAtta.png",
+  ];
+
+  // ✅ Category IDs
+  const categoryIds: Record<string, number> = {
+    tab1: 1,
+    tab2: 2,
+    tab3: 3,
+    tab4: 4,
+  };
+
+  // ✅ Fetch products by category ID
+  const fetchProductsByCategory = async (categoryId: number) => {
+    setLoading(true);
+    setError("");
+    try {
+      const url = `https://ekomart-backend.onrender.com/api/product/getproductbycategory/2`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data || data.length === 0) {
+        setError("No products found for this category.");
+        setProducts([]);
+      } else {
         setProducts(data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Failed to load products. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchProducts();
+  // ✅ Fetch default category (tab1) on mount
+  useEffect(() => {
+    fetchProductsByCategory(categoryIds["tab1"]);
   }, []);
 
-  const handleClose = () => setActiveModal(null);
+  // ✅ Change tab and fetch new products
+  const handleTabClick = (tabId: string) => {
+    setActiveTab(tabId);
+    fetchProductsByCategory(categoryIds[tabId]);
+  };
 
-  const selectedPosts = products.slice(1, 11);
+  // ✅ Safely get product image
+  const getImage = (image: string | undefined, index: number) => {
+    return image && image.trim() !== ""
+      ? image
+      : defaultImages[index % defaultImages.length];
+  };
 
-  const postIndicesSection1 = [12, 5, 6, 4];
-  const postIndicesSection2 = [5, 6, 4, 7];
-  const postIndicesSection3 = [3, 2, 1, 5];
-  const postIndicesSection4 = [8, 11, 12, 16];
+  // ✅ Add to Cart
+  const [addedProductId, setAddedProductId] = useState<string | number | null>(
+    null
+  );
 
-  const getPostsByIndices = (indices: number[]): PostType[] =>
-    indices.map((index) => products[index]).filter(Boolean);
+  const handleAdd = (product: ProductType, index: number) => {
+    addToCart({
+      id: product._id ? Number(product._id) : Date.now(),
+      image: getImage(product.image, index),
+      title: product.productName ?? "Organic Product",
+      price: parseFloat(product.regularPrice?.toString() ?? "0"),
+      quantity: 1,
+      active: true,
+      productName: product.productName ?? "Organic Product",
+      regularPrice: product.regularPrice,
+      productImage: product.image || "",
+    });
 
-  const postsSection1 = getPostsByIndices(postIndicesSection1);
-  const postsSection2 = getPostsByIndices(postIndicesSection2);
-  const postsSection3 = getPostsByIndices(postIndicesSection3);
-  const postsSection4 = getPostsByIndices(postIndicesSection4);
+    setAddedProductId(product._id || index);
+    setTimeout(() => setAddedProductId(null), 4000);
+    toast.success("Added to cart!");
+  };
+
+  // ✅ Add / Remove Wishlist (toggle)
+  const handleWishlist = (product: ProductType, index: number) => {
+    const productIdNumber =
+      product.product_id ??
+      (product._id ? Number(product._id) : undefined) ??
+      Date.now();
+
+    const isInWishlist = wishlistItems.some(
+      (item) => String(item.id) === String(productIdNumber)
+    );
+
+    if (isInWishlist) {
+      removeFromWishlist(productIdNumber);
+      toast.info("💔 Removed from wishlist!");
+      return;
+    }
+
+    addToWishlist({
+      id: productIdNumber,
+      image: getImage(product.image, index),
+      title: product.productName || "Product",
+      price: parseFloat(product.regularPrice?.toString() ?? "0"),
+      quantity: 1,
+    });
+    toast.success("💖 Added to wishlist!");
+  };
 
   return (
-    <div>
-      <div className="popular-product-weekly-seller-item rts-section-gap bg_light-1">
-        <div className="container-2">
-          <div className="row">
-            <div className="col-lg-12">
-              <div className="title-area-between">
-                <h2 className="title-left mb--0">Popular Products</h2>
-                <ul className="nav nav-tabs" id="myTabx" role="tablist">
-                  <li className="nav-item" role="presentation">
-                    <button
-                      onClick={() => setActiveTab("tab1")}
-                      className={`nav-link ${
-                        activeTab === "tab1" ? "active" : ""
-                      }`}
-                    >
-                      Frozen Foods
-                    </button>
-                  </li>
-                  <li className="nav-item" role="presentation">
-                    <button
-                      onClick={() => setActiveTab("tab2")}
-                      className={`nav-link ${
-                        activeTab === "tab2" ? "active" : ""
-                      }`}
-                    >
-                      Diet Foods
-                    </button>
-                  </li>
-                  <li className="nav-item" role="presentation">
-                    <button
-                      onClick={() => setActiveTab("tab3")}
-                      className={`nav-link ${
-                        activeTab === "tab3" ? "active" : ""
-                      }`}
-                    >
-                      Healthy Foods
-                    </button>
-                  </li>
-                  <li className="nav-item" role="presentation">
-                    <button
-                      onClick={() => setActiveTab("tab4")}
-                      className={`nav-link ${
-                        activeTab === "tab4" ? "active" : ""
-                      }`}
-                    >
-                      Vitamin Items
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="row g-4">
-            <div className="col-lg-12">
-              {activeTab === "tab1" && (
-                <div>
-                  <div className="row g-4">
-                    {postsSection1.map((post: PostType, index: number) => (
-                      <div
-                        key={index}
-                        className="col-lg-3 col-md-6 col-sm-6 col-12"
-                      >
-                        <div className="single-shopping-card-one">
-                          <PopularProductMain
-                            Slug={post.slug}
-                            ProductImage={post.image}
-                            ProductTitle={post.title}
-                            Price={post.price}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {activeTab === "tab2" && (
-                <div>
-                  <div className="row g-4">
-                    {postsSection2.map((post: PostType, index: number) => (
-                      <div
-                        key={index}
-                        className="col-lg-3 col-md-6 col-sm-6 col-12"
-                      >
-                        <div className="single-shopping-card-one">
-                          <PopularProductMain
-                            Slug={post.slug}
-                            ProductImage={post.image}
-                            ProductTitle={post.title}
-                            Price={post.price}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {activeTab === "tab3" && (
-                <div>
-                  <div className="row g-4">
-                    {postsSection3.map((post: PostType, index: number) => (
-                      <div
-                        key={index}
-                        className="col-lg-3 col-md-6 col-sm-6 col-12"
-                      >
-                        <div className="single-shopping-card-one">
-                          <PopularProductMain
-                            Slug={post.slug}
-                            ProductImage={post.image}
-                            ProductTitle={post.title}
-                            Price={post.price}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {activeTab === "tab4" && (
-                <div>
-                  <div className="row g-4">
-                    {postsSection4.map((post: PostType, index: number) => (
-                      <div
-                        key={index}
-                        className="col-lg-3 col-md-6 col-sm-6 col-12"
-                      >
-                        <div className="single-shopping-card-one">
-                          <PopularProductMain
-                            Slug={post.slug}
-                            ProductImage={post.image}
-                            ProductTitle={post.title}
-                            Price={post.price}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+    <div className="bg-white max-w-[1430px] md:px-[0px] lg:px-[0] w-full mt-[100px] mx-auto">
+      {/* ✅ Title */}
+      <div className="mb-10 lg:pl-[0] px-[15px] md:px-[20px] lg:px-[0]">
+        <p className="md:text-[35px] text-[30px] font-bold text-[#2D2D2D] mb-2">
+          Shop Our Products
+        </p>
+        <p className="text-[#2D2D2D] text-[18px] md:text-[30px]">
+          Naturally grown, carefully selected Products
+        </p>
       </div>
+
+      {/* ✅ Product Grid */}
+      {loading ? (
+        <div className="flex justify-center items-center py-10">
+          <div className="animate-spin h-8 w-8 border-4 border-[#A3C526] border-t-transparent rounded-full"></div>
+        </div>
+      ) : error ? (
+        <p className="text-center text-gray-500 py-10">{error}</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+          {products.map((product, index) => {
+            const productIdNumber =
+              product.product_id ??
+              (product._id ? Number(product._id) : undefined) ??
+              index;
+            const isInWishlist = wishlistItems.some(
+              (item) => String(item.id) === String(productIdNumber)
+            );
+
+            return (
+              <div
+                key={product._id || index}
+                className="relative w-[332px] max-w-[1430px] mx-auto transition duration-300 group"
+              >
+                {/* Save badge */}
+                <div className="absolute top-4 right-3 bg-[#077D40] flex items-center justify-center text-white text-[15px] font-bold w-[100px] h-[33px] rounded-full z-10">
+                  Save 20%
+                </div>
+
+                {/* Product image */}
+                <div className="relative flex justify-center items-center">
+                  <img
+                    src={"/assets/images/products/Oats.png"}
+                    alt={product.productName || "Product"}
+                    className="w-[331.75px] h-[288px] object-cover"
+                  />
+
+                  {/* Wishlist icon */}
+                  <div className="absolute bottom-3 right-3">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWishlist(product, index);
+                      }}
+                      className={`p-2 rounded-full transition ${
+                        isInWishlist
+                          
+                      }`}
+                    >
+                      <Heart
+                        className={`w-10 h-10 ${
+                          isInWishlist
+                            ? "fill-[#077D40] text-[#077D40]" 
+                            : "text-[#333333]"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Product details */}
+                <div className="">
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="">
+                      <p className="text-[14px] font-bold text-[#000000] truncate">
+                      {product.productName || "Organic Product"}
+                    </p>
+                    </div>
+                    <div className="flex text-[16px]">★★★★★</div>
+                  </div>
+
+                  <div className="flex justify-between items-center mt-1">
+                    <div className="">
+                      <p className="text-gray-600 text-[14px]">
+                      {product.regularPrice
+                        ? `₹${product.regularPrice}`
+                        : "₹95.00"}
+                    </p>
+                    </div>
+                    <div className="">
+                      <p className="text-[12px] text-gray-400">
+                      4.86 (887k Reviews)
+                    </p>
+                    </div>
+                  </div>
+
+                  {/* Add to cart */}
+                  <div className="mt-[25px] w-[332px] hover:text-white text-[14px] h-[51px]">
+                    <button
+                      className={`w-full h-[51px] border border-black rounded hover:bg-[#077D40] hover:text-white transition ${
+                        addedProductId === (product._id || index)
+                          ? "bg-[#077D40] text-white"
+                          : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAdd(product, index);
+                      }}
+                    >
+                      {addedProductId === (product._id || index)
+                        ? "Added ✅"
+                        : "Add to your Cart"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {/* ✅ Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </div>
   );
 };
 
-export default MyComponent;
+export default PopularProducts;

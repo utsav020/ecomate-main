@@ -105,6 +105,9 @@ const CompareElements: React.FC = () => {
       price: product.salePrice ?? product.regularPrice ?? 0,
       quantity: quantity,
       active: true,
+      regularPrice: undefined,
+      productImage: "",
+      productName: ""
     });
 
     setAdded(true);
@@ -341,7 +344,7 @@ const CompareElements: React.FC = () => {
                           {product.weight === "500g" ? "320.00" : "400.00"}
                         </h5>
                       </div>
-                      {/* <div className="grid w-auto grid-cols-2 gap-4">
+                      <div className="grid w-auto grid-cols-2 gap-4">
                         {product.weightOptions.map(
                           (option: {
                             value: Key | null | undefined;
@@ -392,7 +395,7 @@ const CompareElements: React.FC = () => {
                             </div>
                           )
                         )}
-                      </div> */}
+                      </div>
                     </div>
 
                     {/* Quantity and Add to Cart */}

@@ -1,277 +1,463 @@
-    "use client"
-    import React, { useEffect, useState } from 'react';
-    import { Swiper, SwiperSlide } from 'swiper/react';
-    import { Navigation, Autoplay } from 'swiper/modules';
-    import WeeklyBestSellingMain from "@/components/product-main/WeeklyBestSellingMain";
-    import Product from '@/data/Product.json';
+// "use client";
 
+// import React, { useEffect, useState } from "react";
+// import { Swiper, SwiperSlide } from "swiper/react";
+// import { Navigation, Autoplay } from "swiper/modules";
+// import WeeklyBestSellingMain from "@/components/product-main/WeeklyBestSellingMain";
+// import ProductData from "@/data/Product.json"; // fallback data
+// import { useCategory } from "@/components/context/CategoryContext";
 
-    interface PostType {
-        category?: string;
-        slug: string;
-        image: string;
-        title?: string;
-        author?: string;
-        publishedDate?: string;
-        price?: string;
+// interface ProductType {
+//   _id?: string;
+//   slug: string;
+//   category_id?: number;
+//   category?: string;
+//   image: string;
+//   title?: string;
+//   productName?: string;
+//   salePrice?: number | string;
+//   regularPrice?: number | string;
+// }
+
+// const FeatureProduct: React.FC = () => {
+//   const { selectedCategory } = useCategory();
+//   const [filteredProducts, setFilteredProducts] = useState<ProductType[]>([]);
+//   const [activeCategory, setActiveCategory] = useState<string>("");
+//   const [loading, setLoading] = useState<boolean>(true);
+
+//   // ✅ STEP 1: Determine which category to use (context or localStorage)
+//   useEffect(() => {
+//     const storedProduct = localStorage.getItem("selectedProduct");
+//     const storedCategory = localStorage.getItem("activeCategory");
+
+//     let categoryToUse = "";
+
+//     if (selectedCategory && selectedCategory.trim() !== "") {
+//       categoryToUse = selectedCategory;
+//       localStorage.setItem("activeCategory", selectedCategory);
+//     } else if (storedProduct) {
+//       try {
+//         const parsedProduct = JSON.parse(storedProduct);
+//         if (parsedProduct?.category_id) {
+//           categoryToUse = parsedProduct.category_id;
+//           localStorage.setItem("activeCategory", parsedProduct.category_id);
+//         }
+//       } catch (error) {
+//         console.error("⚠️ Error parsing stored product:", error);
+//       }
+//     } else if (storedCategory) {
+//       categoryToUse = storedCategory;
+//     }
+
+//     setActiveCategory(categoryToUse);
+//   }, [selectedCategory]);
+
+//   // ✅ STEP 2: Fetch related products from backend
+//   useEffect(() => {
+//     const fetchRelatedProducts = async () => {
+//       if (!activeCategory) {
+//         setFilteredProducts(ProductData.slice(0, 8));
+//         setLoading(false);
+//         return;
+//       }
+
+//       try {
+//         const res = await fetch(
+//           `https://ekomart-backend.onrender.com/api/product/getproductbycategory/${activeCategory}`
+//         );
+
+//         if (!res.ok) throw new Error("API fetch failed");
+
+//         const data = await res.json();
+//         if (Array.isArray(data) && data.length > 0) {
+//           setFilteredProducts(data);
+//         } else {
+//           console.warn(`⚠️ No products found for category ID: ${activeCategory}`);
+//           setFilteredProducts(ProductData.slice(0, 8));
+//         }
+//       } catch (error) {
+//         console.error("❌ Error fetching category products:", error);
+//         setFilteredProducts(ProductData.slice(0, 8)); // fallback
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchRelatedProducts();
+//   }, [activeCategory]);
+
+//   // ✅ STEP 3: Handle quantity controls
+//   useEffect(() => {
+//     const handleQuantityClick = (e: Event) => {
+//       const button = e.currentTarget as HTMLElement;
+//       const parent = button.closest(".quantity-edit") as HTMLElement | null;
+//       if (!parent) return;
+
+//       const input = parent.querySelector(".input") as HTMLInputElement | null;
+//       const addToCart = parent.querySelector("a.add-to-cart") as HTMLElement | null;
+//       if (!input) return;
+
+//       let oldValue = parseInt(input.value || "1", 10);
+//       let newVal = oldValue;
+
+//       if (button.classList.contains("plus")) newVal = oldValue + 1;
+//       else if (button.classList.contains("minus")) newVal = Math.max(1, oldValue - 1);
+
+//       input.value = newVal.toString();
+//       if (addToCart) addToCart.setAttribute("data-quantity", newVal.toString());
+//     };
+
+//     const buttons = document.querySelectorAll(".quantity-edit .button");
+//     buttons.forEach((button) => {
+//       button.removeEventListener("click", handleQuantityClick);
+//       button.addEventListener("click", handleQuantityClick);
+//     });
+
+//     return () => {
+//       buttons.forEach((button) => {
+//         button.removeEventListener("click", handleQuantityClick);
+//       });
+//     };
+//   }, []);
+
+//   // ✅ Loading & No Product States
+//   if (loading)
+//     return (
+//       <div className="text-center py-16 text-gray-500">
+//         Loading related products...
+//       </div>
+//     );
+
+//   if (filteredProducts.length === 0)
+//     return (
+//       <div className="text-center py-16 text-gray-500">
+//         No related products found.
+//       </div>
+//     );
+
+//   return (
+//     <div className="rts-grocery-feature-area rts-section-gap">
+//       <div className="container">
+//         {/* Section Title */}
+//         <div className="row">
+//           <div className="col-lg-12">
+//             <div className="title-area-between">
+//               <h2 className="title-left">
+//                 {activeCategory
+//                   ? "Related Products"
+//                   : "Featured Products"}
+//               </h2>
+//               <div className="next-prev-swiper-wrapper">
+//                 <div className="swiper-button-prev">
+//                   <i className="fa-regular fa-chevron-left" />
+//                 </div>
+//                 <div className="swiper-button-next">
+//                   <i className="fa-regular fa-chevron-right" />
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Swiper Section */}
+//         <div className="category-area-main-wrapper-one">
+//           <Swiper
+//             modules={[Navigation, Autoplay]}
+//             autoplay={{
+//               delay: 3000,
+//               disableOnInteraction: false,
+//             }}
+//             loop={true}
+//             navigation={{
+//               nextEl: ".swiper-button-next",
+//               prevEl: ".swiper-button-prev",
+//             }}
+//             className="mySwiper-category-1"
+//             breakpoints={{
+//               0: { slidesPerView: 1, spaceBetween: 20 },
+//               320: { slidesPerView: 2, spaceBetween: 20 },
+//               480: { slidesPerView: 3, spaceBetween: 25 },
+//               640: { slidesPerView: 3, spaceBetween: 25 },
+//               840: { slidesPerView: 4, spaceBetween: 30 },
+//               1140: { slidesPerView: 4, spaceBetween: 30 },
+//             }}
+//           >
+//             {filteredProducts.map((post: ProductType, index: number) => (
+//               <SwiperSlide key={index}>
+//                 <div
+//                   className="single-shopping-card-one"
+//                   onClick={() => {
+//                     localStorage.setItem("selectedProduct", JSON.stringify(post));
+//                     if (post.category_id)
+//                       localStorage.setItem("activeCategory", post.category_id.toString());
+//                   }}
+//                 >
+// <WeeklyBestSellingMain
+//   Slug={post.slug || post._id?.toString() || ""}
+//   ProductImage={post.image ||
+//     "/assets/images/products/Oats.png"}
+//   ProductTitle={post.title || post.productName || "Product"}
+//   Price={post.salePrice
+//     ? `₹${post.salePrice}`
+//     : post.regularPrice
+//       ? `₹${post.regularPrice}`
+//       : "₹0.00"} regularPrice={`${post.regularPrice}`} id={0} image={""} title={""} price={0} quantity={0} active={false} productImage={""} productName={""}                  />
+//                 </div>
+//               </SwiperSlide>
+//             ))}
+//           </Swiper>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default FeatureProduct;
+
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+import WeeklyBestSellingMain from "@/components/product-main/WeeklyBestSellingMain";
+import ProductData from "@/data/Product.json"; // fallback data
+import { useCategory } from "@/components/context/CategoryContext";
+import "swiper/css";
+import "swiper/css/navigation";
+
+interface ProductType {
+  _id?: string;
+  slug: string;
+  category_id?: string | number;
+  category?: string;
+  image: string;
+  title?: string;
+  productName?: string;
+  salePrice?: number | string;
+  regularPrice?: number | string;
+}
+
+const FeatureProduct: React.FC = () => {
+  const { selectedCategory } = useCategory();
+  const [filteredProducts, setFilteredProducts] = useState<ProductType[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // ✅ Step 1: Determine which category to use
+  useEffect(() => {
+    const storedProduct = localStorage.getItem("selectedProduct");
+    const storedCategory = localStorage.getItem("activeCategory");
+
+    let categoryToUse = "";
+
+    if (selectedCategory && selectedCategory.trim() !== "") {
+      categoryToUse = selectedCategory;
+      localStorage.setItem("activeCategory", selectedCategory);
+    } else if (storedProduct) {
+      try {
+        const parsedProduct = JSON.parse(storedProduct);
+        if (parsedProduct?.category_id) {
+          categoryToUse = parsedProduct.category_id.toString();
+          localStorage.setItem("activeCategory", categoryToUse);
+        }
+      } catch (error) {
+        console.error("⚠️ Error parsing stored product:", error);
+      }
+    } else if (storedCategory) {
+      categoryToUse = storedCategory;
     }
 
-    function FeatureProduct() {
+    setActiveCategory(categoryToUse);
+  }, [selectedCategory]);
 
+  // ✅ Step 2: Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        let url = "";
 
-        // number count up and down
-        useEffect(() => {
-            const handleQuantityClick = (e: Event) => {
-                const button = e.currentTarget as HTMLElement;
-                const parent = button.closest('.quantity-edit') as HTMLElement | null;
-                if (!parent) return;
+        if (
+          !activeCategory ||
+          activeCategory === "All Products" ||
+          activeCategory.toLowerCase() === "all"
+        ) {
+          url =
+            "https://ekomart-backend.onrender.com/api/product/getallproduct";
+        } else {
+          url = `https://ekomart-backend.onrender.com/api/product/getproductbycategory/${activeCategory}`;
+        }
 
-                const input = parent.querySelector('.input') as HTMLInputElement | null;
-                const addToCart = parent.querySelector('a.add-to-cart') as HTMLElement | null;
-                if (!input) return;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("API fetch failed");
 
-                let oldValue = parseInt(input.value || '1', 10);
-                let newVal = oldValue;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setFilteredProducts(data);
+        } else {
+          console.warn("⚠️ No products found for:", activeCategory);
+          setFilteredProducts(ProductData.slice(0, 8));
+        }
+      } catch (error) {
+        console.error("❌ Error fetching products:", error);
+        setFilteredProducts(ProductData.slice(0, 8));
+      } finally {
+        setLoading(false);
+      }
+    };
 
-                if (button.classList.contains('plus')) {
-                    newVal = oldValue + 1;
-                } else if (button.classList.contains('minus')) {
-                    newVal = oldValue > 1 ? oldValue - 1 : 1;
-                }
+    fetchProducts();
+  }, [activeCategory]);
 
-                input.value = newVal.toString();
-                if (addToCart) {
-                    addToCart.setAttribute('data-quantity', newVal.toString());
-                }
-            };
+  // ✅ Step 3: Quantity button logic (kept for compatibility)
+  useEffect(() => {
+    const handleQuantityClick = (e: Event) => {
+      const button = e.currentTarget as HTMLElement;
+      const parent = button.closest(".quantity-edit") as HTMLElement | null;
+      if (!parent) return;
 
-            const buttons = document.querySelectorAll('.quantity-edit .button');
+      const input = parent.querySelector(".input") as HTMLInputElement | null;
+      const addToCart = parent.querySelector(
+        "a.add-to-cart"
+      ) as HTMLElement | null;
+      if (!input) return;
 
-            // 💡 Remove any existing handlers first (safe rebind)
-            buttons.forEach(button => {
-                button.removeEventListener('click', handleQuantityClick);
-                button.addEventListener('click', handleQuantityClick);
-            });
+      let oldValue = parseInt(input.value || "1", 10);
+      let newVal = oldValue;
 
-            return () => {
-                buttons.forEach(button => {
-                    button.removeEventListener('click', handleQuantityClick);
-                });
-            };
-        }, []);
+      if (button.classList.contains("plus")) newVal = oldValue + 1;
+      else if (button.classList.contains("minus"))
+        newVal = Math.max(1, oldValue - 1);
 
+      input.value = newVal.toString();
+      if (addToCart) addToCart.setAttribute("data-quantity", newVal.toString());
+    };
 
+    const buttons = document.querySelectorAll(".quantity-edit .button");
+    buttons.forEach((button) => {
+      button.removeEventListener("click", handleQuantityClick);
+      button.addEventListener("click", handleQuantityClick);
+    });
 
+    return () => {
+      buttons.forEach((button) => {
+        button.removeEventListener("click", handleQuantityClick);
+      });
+    };
+  }, []);
 
+  // ✅ Step 4: Loading & Empty States
+  if (loading)
+    return (
+      <div className="text-center py-20 text-gray-500 text-lg">
+        Loading related products...
+      </div>
+    );
 
+  if (filteredProducts.length === 0)
+    return (
+      <div className="text-center py-20 text-gray-500 text-lg">
+        No related products found.
+      </div>
+    );
 
-        // modal activation
-        type ModalType = 'one' | 'two' | 'three' | null;
-        const [activeModal, setActiveModal] = useState<ModalType>(null);
-
-
-
-        const handleClose = () => setActiveModal(null);
-
-        // product content
-        const selectedPosts = Product.slice(1, 11);
-
-        const postIndicesSection1 = [1];
-        const postIndicesSection2 = [5];
-        const postIndicesSection3 = [6];
-        const postIndicesSection4 = [16];
-
-        // Helper function to get posts from indices
-        const getPostsByIndices = (indices: number[]): PostType[] =>
-            indices.map(index => Product[index]).filter(Boolean);
-
-        // Prepare post groups
-        const postsSection1 = getPostsByIndices(postIndicesSection1);
-        const postsSection2 = getPostsByIndices(postIndicesSection2);
-        const postsSection3 = getPostsByIndices(postIndicesSection3);
-        const postsSection4 = getPostsByIndices(postIndicesSection4);
-
-
-
-        return (
-            <div>
-                <>
-                    {/* rts grocery feature area start */}
-                    <div className="rts-grocery-feature-area rts-section-gap">
-                        <div className="container">
-                            <div className="row">
-                                <div className="col-lg-12">
-                                    <div className="title-area-between">
-                                        <h2 className="title-left">Related Product</h2>
-                                        <div className="next-prev-swiper-wrapper">
-                                            <div className="swiper-button-prev">
-                                                <i className="fa-regular fa-chevron-left" />
-                                            </div>
-                                            <div className="swiper-button-next">
-                                                <i className="fa-regular fa-chevron-right" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="container">
-                            <div className="row">
-                                <div className="col-lg-12">
-                                    <div className="category-area-main-wrapper-one">
-                                        <Swiper
-                                            modules={[Navigation, Autoplay]}
-                                            scrollbar={{
-                                                hide: true,
-                                            }}
-                                            autoplay={{
-                                                delay: 3000, // Delay between transitions (3 seconds)
-                                                disableOnInteraction: false, // Continue autoplay after user interactions
-                                            }}
-                                            loop={true}
-                                            navigation={{
-                                                nextEl: ".swiper-button-next",
-                                                prevEl: ".swiper-button-prev",
-                                            }}
-                                            className="mySwiper-category-1"
-                                            breakpoints={{
-                                                0: { slidesPerView: 1, spaceBetween: 30 },
-                                                320: { slidesPerView: 2, spaceBetween: 30 },
-                                                480: { slidesPerView: 3, spaceBetween: 30 },
-                                                640: { slidesPerView: 3, spaceBetween: 30 },
-                                                840: { slidesPerView: 4, spaceBetween: 30 },
-                                                1140: { slidesPerView: 4, spaceBetween: 30 },
-                                            }}
-                                        >
-                                            <SwiperSlide>
-                                                    {postsSection1.map((post: PostType, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className=""
-                                                    >
-                                                        <div className="single-shopping-card-one">
-                                                            <WeeklyBestSellingMain
-                                                                Slug={post.slug}
-                                                                ProductImage={post.image}
-                                                                ProductTitle={post.title}
-                                                                Price={post.price}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                            <SwiperSlide>
-                                                {postsSection2.map((post: PostType, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className=""
-                                                    >
-                                                        <div className="single-shopping-card-one">
-                                                            <WeeklyBestSellingMain
-                                                                Slug={post.slug}
-                                                                ProductImage={post.image}
-                                                                ProductTitle={post.title}
-                                                                Price={post.price}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                            <SwiperSlide>
-                                                {postsSection3.map((post: PostType, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className=""
-                                                    >
-                                                        <div className="single-shopping-card-one">
-                                                            <WeeklyBestSellingMain
-                                                                Slug={post.slug}
-                                                                ProductImage={post.image}
-                                                                ProductTitle={post.title}
-                                                                Price={post.price}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                            <SwiperSlide>
-                                                {postsSection4.map((post: PostType, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className=""
-                                                    >
-                                                        <div className="single-shopping-card-one">
-                                                            <WeeklyBestSellingMain
-                                                                Slug={post.slug}
-                                                                ProductImage={post.image}
-                                                                ProductTitle={post.title}
-                                                                Price={post.price}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                            <SwiperSlide>
-                                                {postsSection1.map((post: PostType, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className=""
-                                                    >
-                                                        <div className="single-shopping-card-one">
-                                                            <WeeklyBestSellingMain
-                                                                Slug={post.slug}
-                                                                ProductImage={post.image}
-                                                                ProductTitle={post.title}
-                                                                Price={post.price}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                            <SwiperSlide>
-                                                {postsSection2.map((post: PostType, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className=""
-                                                    >
-                                                        <div className="single-shopping-card-one">
-                                                            <WeeklyBestSellingMain
-                                                                Slug={post.slug}
-                                                                ProductImage={post.image}
-                                                                ProductTitle={post.title}
-                                                                Price={post.price}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                            <SwiperSlide>
-                                                {postsSection3.map((post: PostType, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className=""
-                                                    >
-                                                        <div className="single-shopping-card-one">
-                                                            <WeeklyBestSellingMain
-                                                                Slug={post.slug}
-                                                                ProductImage={post.image}
-                                                                ProductTitle={post.title}
-                                                                Price={post.price}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                        </Swiper>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {/* rts grocery feature area end */}
-                </>
+  // ✅ Step 5: Render Products
+  return (
+    <div className="w-full mt-[100px] max-w-[1730px] mx-auto">
+      <div className="">
+        {/* Section Title */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="">
+            <div className="">
+              <p className="text-[35px] font-bold">
+              {activeCategory ? "Recommended products" : "Featured Products"}
+            </p>
             </div>
-        )
-    }
+            <div className="h-[77px] w-[613px]">
+              <p className="text-[30px] leading-[76.5px]">Naturally grown, carefully selected Products</p>
+            </div>
+          </div>
 
-    export default FeatureProduct
+          <div className="flex items-center gap-3">
+            <div className="">
+              <button className="border border-gray-300 p-2 rounded-md hover:bg-gray-100">
+                <i className="fa-solid fa-chevron-left"></i>
+              </button>
+            </div>
+            <div className="">
+              <button className="border border-gray-300 p-2 rounded-md hover:bg-gray-100">
+                <i className="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Product Slider */}
+        <Swiper
+          modules={[Navigation, Autoplay]}
+          autoplay={{ delay: 3000, disableOnInteraction: false }}
+          loop={true}
+          navigation={{
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+          }}
+          breakpoints={{
+            0: { slidesPerView: 1, spaceBetween: 10 },
+            480: { slidesPerView: 2, spaceBetween: 15 },
+            768: { slidesPerView: 3, spaceBetween: 20 },
+            1440: { slidesPerView: 4, spaceBetween: 10 },
+            1730: { slidesPerView: 5, spaceBetween: 10 },
+          }}
+          className="pb-10"
+        >
+          {filteredProducts.map((product: ProductType, index: number) => (
+            <SwiperSlide key={index}>
+              <div
+                className="w-[332px] cursor-pointer"
+                onClick={() => {
+                  localStorage.setItem(
+                    "selectedProduct",
+                    JSON.stringify(product)
+                  );
+                  if (product.category_id)
+                    localStorage.setItem(
+                      "activeCategory",
+                      product.category_id.toString()
+                    );
+                }}
+              >
+                <WeeklyBestSellingMain
+                  Slug={product.slug || product._id?.toString() || ""}
+                  ProductImage={
+                    product.image || "/assets/images/products/Oats.png"
+                  }
+                  ProductTitle={
+                    product.title || product.productName || "Product"
+                  }
+                  Price={
+                    product.salePrice
+                      ? `₹${product.salePrice}`
+                      : product.regularPrice
+                      ? `₹${product.regularPrice}`
+                      : "₹0.00"
+                  }
+                  regularPrice={`${product.regularPrice}`}
+                  id={0}
+                  image={""}
+                  title={""}
+                  price={0}
+                  quantity={0}
+                  active={false}
+                  productImage={""}
+                  productName={""}
+                />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+    </div>
+  );
+};
+
+export default FeatureProduct;

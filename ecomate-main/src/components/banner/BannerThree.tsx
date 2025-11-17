@@ -1,99 +1,136 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, EffectFade } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/effect-fade';
+import React, { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, EffectFade, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/effect-fade";
+import { useRouter } from "next/navigation";
 
 const BannerThreeSwiper = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const router = useRouter();
+
+  const handleShopClick = () => {
+    router.push("/shop");
+  };
+
   return (
-    <div className="banner-three-swiper-main-wrapper swiper-button-between">
+    <div className="relative w-full max-w-[1920px] mx-auto h-[75vh] md:h-[90vh] lg:h-[1027px] overflow-hidden bg-white">
       <Swiper
-        modules={[Navigation, EffectFade]}
-        spaceBetween={0}
+        modules={[Navigation, EffectFade, Autoplay]}
         slidesPerView={1}
-        loop={true}
-        speed={700}
+        loop
+        speed={800}
         effect="fade"
-        navigation={{
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
+        autoplay={{
+          delay: 4000,
+          disableOnInteraction: false,
         }}
-        breakpoints={{
-          0: { slidesPerView: 1, spaceBetween: 0 },
-          320: { slidesPerView: 1, spaceBetween: 0 },
-          480: { slidesPerView: 1, spaceBetween: 0 },
-          640: { slidesPerView: 1, spaceBetween: 0 },
-          840: { slidesPerView: 1, spaceBetween: 0 },
-          1140: { slidesPerView: 1, spaceBetween: 0 },
-          1540: { slidesPerView: 1, spaceBetween: 0 },
-          1840: { slidesPerView: 1, spaceBetween: 0 },
-        }}
-        className="mySwiper-category-1"
+        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+        className="w-full h-full"
       >
-        {/* Slide 1 */}
+        {/* ======================================
+              SLIDE 1
+        ======================================= */}
         <SwiperSlide>
-          <div className="rts-section-gap rts-banner-area-three banner-bg-full_1">
-            <div className="container-2">
-              <div className="row">
-                <div className="col-lg-12">
-                  <div className="banner-inner-content-three">
-                    <span className="pre">
-                      Get up to 30% off on your first $150 purchase
-                    </span>
-                    <h1 className="title">
-                      Don’t miss our amazing <br />
-                      grocery deals
-                    </h1>
-                    <p className="dsicription">
-                      We have prepared special discounts for you on grocery products. Don't miss these opportunities...
-                    </p>
-                    <a href="/shop" className="rts-btn btn-primary radious-sm with-icon">
-                      <div className="btn-text">Shop Now</div>
-                      <div className="arrow-icon"><i className="fa-light fa-arrow-right"></i></div>
-                      <div className="arrow-icon"><i className="fa-light fa-arrow-right"></i></div>
-                    </a>
-                  </div>
+          <div
+            className="w-full h-full flex items-center"
+            style={{
+              backgroundImage: "url('/assets/images/banner/banner-2.png')",
+            }}
+          >
+            <div className="px-6 md:px-16 lg:px-28 max-w-[900px]">
+              <p className="text-[#2D2D2D] text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-bold leading-tight mb-4">
+                Carefully Selected Beans Pure Nutrition
+                <span className="text-[#A3C526]"> In Every Bite.</span>
+              </p>
+
+              <p className="text-[#575757] text-sm sm:text-base md:text-[20px] max-w-[750px] mb-8">
+                Pure, natural, and packed with goodness—that’s the power of
+                organic beans! Fuel your day the natural way with organic beans!
+              </p>
+
+              <div className="group">
+                <div
+                  onClick={handleShopClick}
+                  className="cursor-pointer hover:bg-[#A3C526] hover:text-white flex items-center justify-center w-[180px] md:w-[207px] h-[55px] md:h-[62px] border border-[#CDCBC0] transition-all"
+                >
+                  <span className="text-[14px]">Explore More</span>
+                  <i className="fa-light fa-arrow-right ml-3 text-[18px]"></i>
                 </div>
+              </div>
+
+              <div className="absolute bottom-36 md:bottom-50 left-1/2 transform -translate-x-1/5 w-[180px] md:w-[220px] flex justify-between">
+                <div
+                  className={`h-[5px] w-[45%] transition-all duration-500 ${
+                    activeIndex === 0 ? "bg-[#A3C526]" : "bg-black/30"
+                  }`}
+                ></div>
+
+                <div
+                  className={`h-[5px] w-[45%] transition-all duration-500 ${
+                    activeIndex === 1 ? "bg-[#A3C526]" : "bg-black/30"
+                  }`}
+                ></div>
               </div>
             </div>
           </div>
         </SwiperSlide>
 
-        {/* Slide 2 */}
+        {/* ======================================
+              SLIDE 2
+        ======================================= */}
         <SwiperSlide>
-          <div className="rts-section-gap rts-banner-area-three img-two banner-bg-full_1">
-            <div className="container-2">
-              <div className="row">
-                <div className="col-lg-12">
-                  <div className="banner-inner-content-three">
-                    <span className="pre">
-                      Get up to 10% off on your first $250 purchase
-                    </span>
-                    <h1 className="title">
-                      Check out our incredible <br /> deals today
-                    </h1>
-                    <p className="dsicription">
-                      We have prepared special discounts for you on grocery products. Don't miss these opportunities...
-                    </p>
-                    <a href="/shop" className="rts-btn btn-primary radious-sm with-icon">
-                      <div className="btn-text">Shop Now</div>
-                      <div className="arrow-icon"><i className="fa-light fa-arrow-right"></i></div>
-                      <div className="arrow-icon"><i className="fa-light fa-arrow-right"></i></div>
-                    </a>
-                  </div>
+          <div
+            className="w-full h-full flex items-center"
+            style={{
+              backgroundImage: "url('/assets/images/banner/banner-1.png')",
+            }}
+          >
+            <div className="px-6 md:px-16 lg:px-28 max-w-[900px]">
+              <p className="text-[#2D2D2D] text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-bold leading-tight mb-4">
+                Carefully Selected Beans Pure Nutrition
+                <span className="text-[#A3C526]"> In Every Bite.</span>
+              </p>
+
+              <p className="text-[#575757] text-sm sm:text-base md:text-[20px] max-w-[750px] mb-8">
+                Pure, natural, and packed with goodness—that’s the power of
+                organic beans! Fuel your day the natural way with organic beans!
+              </p>
+
+              <div className="group">
+                <div
+                  onClick={handleShopClick}
+                  className="cursor-pointer hover:bg-[#A3C526] hover:text-white flex items-center justify-center w-[180px] md:w-[207px] h-[55px] md:h-[62px] border border-[#CDCBC0] transition-all"
+                >
+                  <span className="text-[14px]">Explore More</span>
+                  <i className="fa-light fa-arrow-right ml-3 text-[18px]"></i>
                 </div>
+              </div>
+
+              <div className="absolute bottom-36 md:bottom-50 left-1/2 transform -translate-x-1/5 w-[180px] md:w-[220px] flex justify-between">
+                <div
+                  className={`h-[5px] w-[45%] transition-all duration-500 ${
+                    activeIndex === 0 ? "bg-[#A3C526]" : "bg-black/30"
+                  }`}
+                ></div>
+
+                <div
+                  className={`h-[5px] w-[45%] transition-all duration-500 ${
+                    activeIndex === 1 ? "bg-[#A3C526]" : "bg-black/30"
+                  }`}
+                ></div>
               </div>
             </div>
           </div>
         </SwiperSlide>
-
-        {/* Navigation Buttons */}
-        <div className="swiper-button-next"><i className="fa-regular fa-arrow-right"></i></div>
-        <div className="swiper-button-prev"><i className="fa-regular fa-arrow-left"></i></div>
       </Swiper>
+
+      {/* ======================================
+             CUSTOM PAGINATION LINES
+      ======================================= */}
     </div>
   );
 };

@@ -32,32 +32,32 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [isWishlistLoaded, setIsWishlistLoaded] = useState(false);
 
-  // Load from localStorage on first mount
+  // Load wishlist on mount
   useEffect(() => {
-    const storedWishlist = localStorage.getItem('wishlist');
+    const storedWishlist = localStorage.getItem('wishlistItems');
     if (storedWishlist) {
       try {
         setWishlistItems(JSON.parse(storedWishlist));
       } catch (error) {
         console.error('Failed to parse wishlist from localStorage:', error);
-        localStorage.removeItem('wishlist');
+        localStorage.removeItem('wishlistItems');
       }
     }
     setIsWishlistLoaded(true);
   }, []);
 
-  // Save to localStorage whenever wishlist changes
+  // Save to localStorage when updated
   useEffect(() => {
     if (isWishlistLoaded) {
-      localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
+      localStorage.setItem('wishlistItems', JSON.stringify(wishlistItems));
     }
   }, [wishlistItems, isWishlistLoaded]);
 
-  // Add to wishlist (no duplicates)
+  // Add to wishlist (avoid duplicates)
   const addToWishlist = (item: WishlistItem) => {
     setWishlistItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
-      if (existing) return prev;
+      const exists = prev.find((i) => i.id === item.id);
+      if (exists) return prev;
       return [...prev, item];
     });
   };

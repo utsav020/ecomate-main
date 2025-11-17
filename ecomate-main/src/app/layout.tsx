@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poltawski_Nowy } from "next/font/google";
 import "./globals.css";
 import "../../public/assets/css/bootstrap.min.css";
 import "../../public/assets/css/plugins.css";
@@ -7,19 +7,17 @@ import "../../public/assets/css/style.css";
 
 import { CartProvider } from "../components/header/CartContext";
 import { WishlistProvider } from "../components/header/WishlistContext";
-import { CompareProvider } from "../components/header/CompareContext";
+import { ProductProvider } from "../components/context/page";
+import { CategoryProvider } from "../components/context/CategoryContext"; // ✅ New Import
 
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poltawskiNowy = Poltawski_Nowy({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-poltawski-nowy",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -42,17 +40,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-
-      <head><script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script></head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <CompareProvider>
+      <head>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+      </head>
+      <body className={`${poltawskiNowy.variable}`}>
           <WishlistProvider>
             <CartProvider>
-              {children}
-              <ToastContainer position="top-right" autoClose={3000} />
+              <ProductProvider>
+                {/* ✅ Category Provider added here */}
+                <CategoryProvider>
+                  {children}
+                  <ToastContainer position="top-right" autoClose={3000} />
+                </CategoryProvider>
+              </ProductProvider>
             </CartProvider>
           </WishlistProvider>
-        </CompareProvider>
       </body>
     </html>
   );

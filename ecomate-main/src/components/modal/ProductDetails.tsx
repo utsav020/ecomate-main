@@ -37,8 +37,11 @@ const ProductDetails: React.FC<ModalProps> = ({
     const item = {
       id: Date.now(),
       image: productImage,
+      productImage: productImage,
       title: productTitle,
+      productName: productTitle, // Added required property
       price: priceNumber,
+      regularPrice: priceNumber, // You may want to use a different value if available
       quantity: quantity,
       active: true,
     };

@@ -2,25 +2,46 @@
 
 import { useState, useEffect } from "react";
 import ProductDetails from "@/components/modal/ProductDetails";
-import CompareModal from "@/components/modal/CompareModal";
 import { useCart } from "@/components/header/CartContext";
 import { useWishlist } from "@/components/header/WishlistContext";
-import { useCompare } from "@/components/header/CompareContext";
 import { toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Heart } from "lucide-react";
 
 interface BlogGridMainProps {
   Slug: string;
   ProductImage: string;
   ProductTitle?: string;
   Price?: string;
+  regularPrice?: string;
 }
 
-const BlogGridMain: React.FC<BlogGridMainProps> = ({
+// interface BlogGridMainProps {
+//   Slug: string;
+//   ProductImage: string;
+//   ProductTitle?: string;
+//   Price?: string | number;
+//   regularPrice?: string | number;
+// }
+
+interface ProductType {
+  id: number;
+  image: string;
+  title: string;
+  price: number;
+  quantity: number;
+  active: boolean;
+  regularPrice: number | string;
+  productImage: string;
+  productName: string;
+}
+
+const BlogGridMain: React.FC<BlogGridMainProps & ProductType> = ({
   Slug,
   ProductImage,
   ProductTitle,
   Price,
+  regularPrice,
 }) => {
   type ModalType = "one" | "two" | "three" | null;
   const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -28,7 +49,8 @@ const BlogGridMain: React.FC<BlogGridMainProps> = ({
 
   const { addToCart } = useCart();
   const { addToWishlist } = useWishlist();
-  const { addToCompare } = useCompare();
+
+  const [wishlist, setWishlist] = useState<(string | number)[]>([]);
 
   const [added, setAdded] = useState(false);
 
@@ -50,7 +72,7 @@ const BlogGridMain: React.FC<BlogGridMainProps> = ({
     });
   };
 
-  const handleAdd = () => {
+  const handleAdd = (product?: any, index?: any) => {
     addToCart({
       id: Date.now(),
       image: `/assets/images/grocery/${ProductImage}`,
@@ -58,12 +80,15 @@ const BlogGridMain: React.FC<BlogGridMainProps> = ({
       price: parseFloat(Price ?? "0"),
       quantity: 1,
       active: true,
+      regularPrice: regularPrice ?? "0",
+      productImage: "",
+      productName: "",
     });
     setAdded(true);
     notify("🛒 Added to Cart!", "success");
   };
 
-  const handleWishlist = () => {
+  const handleWishlist = (p0: any) => {
     addToWishlist({
       id: Date.now(),
       image: `/assets/images/grocery/${ProductImage}`,
@@ -74,20 +99,27 @@ const BlogGridMain: React.FC<BlogGridMainProps> = ({
     notify("❤️ Added to Wishlist!", "success");
   };
 
-  const handleCompare = () => {
-    addToCompare({
-      image: `/assets/images/grocery/${ProductImage}`,
-      name: ProductTitle ?? "Default Product Title",
-      price: Price ?? "0",
-      description:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-      rating: 5,
-      ratingCount: 25,
-      weight: "500g",
-      inStock: true,
-    });
-    notify("📊 Added to Compare!", "success");
+  const toggleWishlist = (id: string | number) => {
+    setWishlist((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
+    );
+    toast("Wishlist updated!");
   };
+
+  // const handleCompare = () => {
+  //   addToCompare({
+  //     image: `/assets/images/grocery/${ProductImage}`,
+  //     name: ProductTitle ?? "Default Product Title",
+  //     price: Price ?? "0",
+  //     description:
+  //       "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+  //     rating: 5,
+  //     ratingCount: 25,
+  //     weight: "500g",
+  //     inStock: true,
+  //   });
+  //   notify("📊 Added to Compare!", "success");
+  // };
 
   useEffect(() => {
     const handleQuantityClick = (e: Event) => {
@@ -126,120 +158,105 @@ const BlogGridMain: React.FC<BlogGridMainProps> = ({
   }, []);
 
   return (
-    <>
-      <div className="group relative overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white transition-all hover:shadow-lg">
+    <div className="">
+      <div className="group w-[332px] h-[450px] relative bg-white">
         {/* Product Image */}
         <div className="relative">
           <a
             href={`/shop/${Slug}`}
-            className="block overflow-hidden rounded-t-xl"
+            className="block "
           >
-            <div className="absolute -left-3 top-3 z-10 bg-green-500 text-center text-white text-[12px] w-[70px] font-semibold px-2 py-1 rounded-full">
-              25% Off
+            <div className="absolute right-[10.91px] top-[10px] z-10 flex items-center justify-center bg-[#077D40] w-[100px] h-[33px] text-center text-white text-[15px] font-bold rounded-full">
+              Save 20%
             </div>
-            <img
-              src={`/assets/images/grocery/${ProductImage}`}
-              alt="grocery"
-              className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          </a>
+            <div className="">
+              <img
+                src={`/assets/images/products/Oats.png`}
+                alt="grocery"
+                className="w-[331.5px] h-[288px] object-cover "
+              />
+            </div>
 
-          {/* Action buttons */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
-            <div className="bg-white rounded-full shadow hover:bg-gray-100 transition">
-              <button
-                title="Add To Wishlist"
-                onClick={handleWishlist}
-                className="p-2 transition"
-              >
-                <i className="fa-regular fa-heart text-gray-700 hover:text-green-500" />
+            {/* Wishlist icon (inside image, bottom-right) */}
+            <div className="absolute bottom-3 right-3">
+              <button onClick={() => handleWishlist(Slug)} className="">
+                <Heart
+                  className={`w-10 h-10 ${
+                    wishlist.includes(Slug)
+                      ? "fill-[#077D40] text-[#077D40]"
+                      : "text-[#333333]"
+                  }`}
+                />
               </button>
             </div>
-            <div className="bg-white rounded-full shadow hover:bg-gray-100 transition">
-              <button
-                title="Compare"
-                onClick={handleCompare}
-                className="p-2 "
-              >
-                <i className="fa-solid fa-arrows-retweet text-gray-700 hover:text-green-500" />
-              </button>
-            </div>
-            <div className="bg-white rounded-full shadow hover:bg-gray-100 transition">
-              <button
-                title="Quick View"
-                onClick={() => setActiveModal("two")}
-                className="p-2"
-              >
-                <i className="fa-regular fa-eye text-gray-700 hover:text-green-500" />
-              </button>
-            </div>
-          </div>
+          </a>
         </div>
 
         {/* Product Info */}
-        <div className="p-4 space-y-3">
-          <a href={`/shop/${Slug}`}>
-            <h4 className="text-base max-w-sm mx-auto text-center w-auto font-semibold text-gray-800 hover:text-primary transition">
-              {ProductTitle ?? "How to growing your business"}
-            </h4>
-          </a>
-          {/* <span className="block text-[16px] text-gray-500">500g Pack</span> */}
+        <div className="space-y-3">
+          <div className="w-[332px] mt-[13px] h-[53px]">
+            {/* Product Name & Rating */}
+            <div className="flex h-[24px] items-center justify-between">
+              <div className="">
+                <p className="text-[14px] font-bold text-[#000000] truncate">
+                  {ProductTitle || "Organic Product"}
+                </p>
+              </div>
+              {/* Rating */}
+              <div className="text-black mr-3">
+                {Array(5)
+                  .fill(0)
+                  .map((_, i) => (
+                    <span className="text-[16px]" key={i}>
+                      ★
+                    </span>
+                  ))}
+              </div>
+            </div>
 
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-[18px] font-semibold text-black">{`Rs. ${Price}`}</span>
-            <span className="text-[14px] text-gray-400 line-through">$36.00</span>
+            {/* Price & Reviews */}
+            <div className="flex items-center h-[24px] justify-between">
+              <div className="leading-[23.8px]">
+                <p className="text-gray-600 text-[14px]">
+                  {Price ? `₹${regularPrice}` : "₹95.00"}
+                </p>
+              </div>
+              <div className="mr-3">
+                <p className="text-[14px] text-[#3333338C]">
+                  4.86 (887k Reviews)
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between mt-4">
-            {/* <div className="quantity-edit flex items-center border rounded-md overflow-hidden">
-              <button className="button minus px-3 py-2 text-gray-600 hover:bg-gray-100">
-                <i className="fa-regular fa-chevron-down" />
-              </button>
-              <input
-                type="text"
-                className="input w-10 text-center border-x outline-none text-gray-700"
-                defaultValue={1}
-              />
-              <button className="button plus px-3 py-2 text-gray-600 hover:bg-gray-100">
-                <i className="fa-regular fa-chevron-up" />
-              </button>
-            </div> */}
-
-           <div className="flex items-center mx-auto justify-center h-20 max-w-xs w-full border-2 gap-4 bg-white text-black px-4 py-2 rounded-full font-medium shadow hover:bg-primary/90 transition">
-             <div className="">
-              <a
-              href="#"
+          {/* button */}
+          <div className="mt-[40px] w-[332px] border-2 hover:text-white text-[14px] h-[51px]">
+            <button
+              className={`w-full h-[51px] border border-black rounded hover:bg-[#077D40] hover:text-white ${
+                added ? "bg-[#077D40] text-white" : ""
+              }`}
               onClick={(e) => {
                 e.preventDefault();
                 handleAdd();
               }}
             >
-              <span>{added ? "Added" : "Add to Cart"}</span>
-            </a>
-             </div>
-            <div className="">
-              <i
-                className={
-                  added
-                    ? "fa-solid fa-check text-black"
-                    : "fa-regular fa-cart-shopping text-black"
-                }
-              />
-            </div>
-           </div>
+              {added ? "Added ✅" : "Add to your Cart"}
+            </button>
           </div>
         </div>
       </div>
 
-      <CompareModal show={activeModal === "one"} handleClose={handleClose} />
+      <div className="">
+        {/* <CompareModal show={activeModal === "one"} handleClose={handleClose} />
       <ProductDetails
         show={activeModal === "two"}
         handleClose={handleClose}
         productImage={`/assets/images/grocery/${ProductImage}`}
         productTitle={ProductTitle ?? "Default Product Title"}
         productPrice={Price ?? "0"}
-      />
-    </>
+      /> */}
+      </div>
+    </div>
   );
 };
 

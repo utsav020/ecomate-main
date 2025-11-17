@@ -2,10 +2,25 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-interface CartItem {
+export interface CartItem {
+  regularPrice: any;
+  productImage: string;
   id: number;
   image: string;
   title: string;
+  productName: string;
+  price: number;
+  quantity: number;
+  active: boolean; // true = cart, false = wishlist
+}
+
+export interface CartItem1 {
+  regularPrice: any;
+  productImage: string;
+  id: number;
+  image: string;
+  title: string;
+  productName: string;
   price: number;
   quantity: number;
   active: boolean; // true = cart, false = wishlist
@@ -53,20 +68,47 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [cartItems, isCartLoaded]);
 
-  // Add item to cart (active: true)
-  const addToCart = (item: CartItem) => {
-    setCartItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id && i.active === true);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === item.id && i.active === true
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        );
+  // ✅ Add item to cart (active: true) + call backend API
+  const addToCart = async (item: CartItem) => {
+    try {
+      // 1️⃣ Make backend API call
+      const response = await fetch('https://ekomart-backend.onrender.com/api/cart/addcart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Authorization: `Bearer ${token}`, // optional if you use JWT
+        },
+        body: JSON.stringify({
+          productId: item.id, // assuming 'id' is product ID
+          quantity: item.quantity,
+          price: item.price,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Failed to add to backend cart:', data);
       } else {
-        return [...prev, item];
+        console.log('✅ Added to backend cart:', data);
       }
-    });
+
+      // 2️⃣ Update local state
+      setCartItems((prev) => {
+        const existing = prev.find((i) => i.id === item.id && i.active === true);
+        if (existing) {
+          return prev.map((i) =>
+            i.id === item.id && i.active === true
+              ? { ...i, quantity: i.quantity + item.quantity }
+              : i
+          );
+        } else {
+          return [...prev, item];
+        }
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
   };
 
   // Add item to wishlist (active: false)
